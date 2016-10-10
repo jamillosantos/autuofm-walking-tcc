@@ -1,0 +1,11 @@
+*.aux
+*.log
+src/main.lof
+src/main.lot
+; src/main.pdf
+src/main.synctex.gz
+src/main.toc
+tmp/
+.project
+.settings/
+.texlipse

@@ -6,7 +6,7 @@
 \vspace{1cm}
 
 \begin{flushright}
-	Autor: Nome do aluno\\
+	Autor: Jamillo Santos\\
 	Orientador(a): Titulação e nome do(a) orientador(a)
 \end{flushright}
 
@@ -15,6 +15,15 @@
 \begin{center}
 	\Large{\textsc{\textbf{Resumo}}}
 \end{center}
+
+
+\noindent Este trabalho apresenta a implementação do \textit{Walking Gait} utilizado pelo time AUT-UofM nas Robocup 2015 e 2016 em C++. A versão anterior utilizava uma placa microcontroladora OpenCM9, baseada em Arduino, que impunham algumas dificuldades de manutenção, extensão e testes (unitários e de integração).
+
+Um dos principais componentes do \textit{Walking Gait} é a compensação de equilíbrio. Para isto, o componente usa uma \textit{IMU} para capturar as informações necessárias para detectar perturbações externas. Para a normalização dos dados capturados da \textit{IMU}, um filtro de Kalman é utilizado. Para a correta validação deste componente, um \textit{MOCK} do sensor \textit{IMU} do celular.
+
+Para o configuração dos parâmetros para o controle e customização da caminhada, foi desenvolvido uma interface web responsiva. Assim, a configuração poderá ser realizada de qualquer plataforma.
+
+Por fim, a validação do sistema de dá em duas etapas. A primeira se dá através de uma simulação no Gazebo/ROS. Posteriormente, o sistema é testado em \textit{ARASH}, um robô humanóide de 1,05m.
 
 \noindent O resumo deve apresentar de forma concisa os pontos relevantes de um
 texto, fornecendo uma visão rápida e clara do conteúdo e das conclusões do
@@ -27,4 +36,4 @@ descritores. Por fim, deve-se evitar, na redação do resumo, o uso de parágraf
 diagramas e símbolos, optando-se, quando necessário, pela transcrição na forma
 extensa, além de não incluir citações bibliográficas.
 
-\noindent\textit{Palavras-chave}: Palavra-chave 1, Palavra-chave 2, Palavra-chave 3.
+\noindent\textit{Palavras-chave}: Robótica, Humanoide, Walking Gait?, Arduino, C++.
