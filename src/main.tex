@@ -1,7 +1,7 @@
 % Pre-ambulo
 \documentclass[a4paper, 12pt]{abnt}
 
-%% Pacotes para texto em Ingl�s
+%% Pacotes para texto em Inglês
 % \usepackage[brazil]{babel}
 % \usepackage[T1]{fontenc}
 % \usepackage[latin1]{inputenc}
@@ -29,19 +29,29 @@
 % Redefinicao de instrucoes
 \floatname{algorithm}{Algoritmo}
 \renewcommand{\algorithmicrequire}{\textbf{Entrada:}}
-\renewcommand{\algorithmicensure}{\textbf{Sa��da:}}
+\renewcommand{\algorithmicensure}{\textbf{Saída:}}
 \renewcommand{\algorithmicend}{\textbf{fim}}
 \renewcommand{\algorithmicif}{\textbf{se}}
-\renewcommand{\algorithmicthen}{\textbf{ent��o}}
-\renewcommand{\algorithmicelse}{\textbf{sen��o}}
+\renewcommand{\algorithmicthen}{\textbf{então}}
+\renewcommand{\algorithmicelse}{\textbf{senão}}
 \renewcommand{\algorithmicfor}{\textbf{para}}
 \renewcommand{\algorithmicforall}{\textbf{para todo}}
-\renewcommand{\algorithmicdo}{\textbf{fa��a}}
+\renewcommand{\algorithmicdo}{\textbf{faça}}
 \renewcommand{\algorithmicwhile}{\textbf{enquanto}}
 \renewcommand{\algorithmicloop}{\textbf{loop}}
 \renewcommand{\algorithmicrepeat}{\textbf{repetir}}
-\renewcommand{\algorithmicuntil}{\textbf{at�� que}}
+\renewcommand{\algorithmicuntil}{\textbf{até que}}
 \renewcommand{\algorithmiccomment}[1]{\% #1}
+
+\newcommand{\writeauthor}{Jamillo G. da S. Santos}
+\newcommand{\writeteacher}{Prof. Dr. Eduardo Braulio}
+\newcommand{\writeteacheren}{Prof. Doc. Eduardo Braulio}
+\newcommand{\writedate}{Abril 2017}
+
+\newcommand{\guide}[1]
+{%
+	{\LARGE \textcolor{red}{\textbf{GUIA:} #1}}
+}
 
 
 % Definicao da lista de simbolos
@@ -59,7 +69,7 @@
 % \listadesimbolos: comando que imprime a lista de simbolos
 \newcommand{\listadesimbolos}
 {
-	\pretextualchapter{Lista de s��mbolos}
+	\pretextualchapter{Lista de símbolos}
 	{\setlength{\parindent}{0cm}
 	\@starttoc{los}}
 }

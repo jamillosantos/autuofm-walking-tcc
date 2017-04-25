@@ -1,31 +1,58 @@
-% Introdu��o
+% Introdução
 \chapter{Introdução}
 
-A introdução é a parte inicial do texto e que possibilita uma visão geral de
-todo o trabalho, devendo constar a delimitação do assunto tratado, objetivos da
-pesquisa, motivação para o desenvolvimento da mesma e outros elementos
-necessários para situar o tema do trabalho.
+
+\guide{Falar sobre que somos cercados por robôs especialistas.}
+
+\guide{Falar sobre a robótica em amplo contexto.}
+
+\guide{
+	Falar o porquê de robótica humanoide. Mundo de humanos. Ferramentas projetadas
+	para humanos. Qual o \textit{design} adaptaria-se melhor?
+}
+
+\guide{
+	Falar das dificuldades na robótica humanoide e fazer uma contextualização
+	da caminhada citando alguns trabalhos recentes.
+}
+
+\guide{
+	Falar sobre o consórcio entre as universidades da AUT e UofM e da sua
+	participação na RoboCup. Assim concluir o porquê utilizar a sua abordagem
+	de \textit{walking gait}.
+}
+\guide{
+	Falar o porquê a o \textit{walking gait} do AUT-UofM precisa de melhoria.
+}
+
+\guide{
+	Falar sobre a solução.
+}
+
+Quando pensamos em robótica, imaginamos um cenário futurista cheio de tecnologia
+com robôs super inteligentes nos substituindo em diversos aspectos. Porém,
+nos dias de hoje já estamos cercados de robôs extremamente especialistas e
+eficientes. Máquinas que automatizam nossas tarefas mais corriqueiras do dia
+a dia, como veículos de transporte, aspiradores de pó inteligentes e até
+mesmo liquidificadores. Assim, robôs são muito tão especializados que apenas
+servem para um propósito.
+
+A caminhada de robôs humanoides é um componente essencial para a realização 
+a maioria das tarefas relacionadas a este tipo de robô. Afinal locomover-se
+está no centro de muitas tarefas e uma caminhada estável provê uma fundação
+firme para a utilização deste componente no desenvolvimento de outras tarefas
+muito mais complexas.
 
 
-
-
-
-
-
-A caminhada de robôs humanoides é um componente essencial para a realização a maioria das tarefas relacionadas a este tipo de robô. Afinal locomover-se está no centro de muitas tarefas e uma caminhada estável provê uma fundação firme para a utilização deste componente no desenvolvimento de outras tarefas muito mais complexas.
-
-Nas edições 2015 e 2016 da RoboCup, realizada em Hefei (China) e Leipzig (Alemanhã), o sistema que controlou a caminhada de \textit{Arash}; um robô humanóide de 105 centímetros de altura que tirou o 3º lugar no futebol de robô (2015 e 2016), 2º e 1º lugar no desafio técnico em 2015 e 2016, respectivamente; foi desenvolvido utilizando placa microcontroladora \textit{OpenCM 9.04}, compatível com Arduino, e batizado de \textit{AUT-UofM-Walk-Engine}. Porém, para configurar este componente é necessário fazer alterações diretas no código, compilá-lo e enviá-lo à \textit{OpenCM9}. Fazer isto durante a competição, um ambiente com mudanças constantes e com uma forte restrição de tempo, torna difícil a vida da equipe.
-
-Este trabalho é um relatório sobre a conversão de código-fonte do microcontrolador para um código C++11, e como o código foi melhorado e organizado para que suporte futuras implementações.
-
-
-
-
-
-
-
-
-
+Nas edições 2015 e 2016 da RoboCup, realizada em Hefei (China) e Leipzig (Alemanhã),
+o sistema que controlou a caminhada de \textit{Arash}; um robô humanóide de
+105 centímetros de altura que tirou o 3º lugar no futebol de robô (2015 e 2016),
+2º e 1º lugar no desafio técnico em 2015 e 2016, respectivamente; foi desenvolvido
+utilizandoplaca microcontroladora \textit{OpenCM 9.04}, compatível com Arduino,
+e batizado de \textit{AUT-UofM-Walk-Engine}. Porém, para configurar este componente
+é necessário fazer alterações diretas no código, compilá-lo e enviá-lo à \textit{OpenCM9}.
+Fazer isto durante a competição, um ambiente com mudanças constantes e com uma forte
+restrição de tempo, torna difícil a vida da equipe.
 
 \section{Objetivos}
 
@@ -34,18 +61,16 @@ Nesta seção são definidos os objetivos gerais e específicos do trabalho.
 \subsection{Objetivos Gerais}
 
 \begin{itemize}
-  \item Criar componente \textit{walking gait}, controlado em runtime via JSON over UDP, com ferramenta de configuração simplificada.
+	\item Criar componente \textit{walking gait}, controlado em runtime via JSON over UDP, com ferramenta de configuração simplificada.
 \end{itemize}
 
 \subsection{Objetivos Específicos} 
 
-Lista de objetivos específicos do trabalho.
-
 \begin{itemize}
-  \item Melhorar o código atual (legibilidade e arquitetura);
-  \item Diminuir a curva de aprendizado, tornando o código extensível;
-  \item Integrar componente com o ROS (Robot Operating System) e Gazebo (simulação);
-  \item Diminuindo o tempo, necessidade de conhecimento sobre o código para efetuar a configuração.
+	\item Melhorar o código atual (legibilidade e arquitetura);
+	\item Diminuir a curva de aprendizado, tornando o código extensível;
+	\item Integrar componente com o ROS (Robot Operating System) e Gazebo (simulação);
+	\item Diminuindo o tempo, necessidade de conhecimento sobre o código para efetuar a configuração.
 \end{itemize}
 
 \section{Metodologia}
