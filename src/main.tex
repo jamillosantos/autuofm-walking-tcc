@@ -24,6 +24,7 @@
 \usepackage{algorithmic}
 %\usepackage{alg} 
 %\usepackage{hyperref}
+\usepackage{framed}
 
 
 % Redefinicao de instrucoes
@@ -48,10 +49,16 @@
 \newcommand{\writeteacheren}{Prof. Doc. Eduardo Braulio}
 \newcommand{\writedate}{Abril 2017}
 
-\newcommand{\guide}[1]
-{%
-	{\LARGE \textcolor{red}{\textbf{GUIA:} #1}}
-}
+\newenvironment{guide}{%
+	\color{red}
+	\vspace{5mm}
+	{\LARGE GUIA:}
+	\hrule
+}{
+	\vspace{1.5mm}
+	\hrule
+	\vspace{5mm}
+}%
 
 
 % Definicao da lista de simbolos
