@@ -36,3 +36,6 @@ theme: jekyll-theme-minimal
 exclude:
   - Gemfile
   - Gemfile.lock
+
+gems:
+  - jemoji
