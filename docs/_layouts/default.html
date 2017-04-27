@@ -42,7 +42,7 @@
         <h1>{{ site.title | default: site.github.repository_name }}</h1>
         <p>{{ site.description | default: site.github.project_tagline }}</p>
 
-        <p><img src="{{ site.url }}/assets/imgs/robot-front.png" width="100%" /></p>
+        <p><img src="{{ site.baseurl }}/assets/imgs/robot-front.png" width="100%" /></p>
 
         {% assign today = site.time | date: '%s' %}
         {% assign duedate = '2017-07-03 23:59:59' | date: '%s' %}
