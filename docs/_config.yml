@@ -19,8 +19,8 @@ description: > # this means to ignore newlines until "baseurl:"
   A caminhada de robôs humanoides é um problema super interessante de estudar,
   acompanhe aqui o dia a dia do desenvolvimento da parte escrita sobre a
   implementação do meu trabalho de conclusão de curso.
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+# baseurl: "" # the subpath of your site, e.g. /blog
+# url: "" # the base hostname & protocol for your site, e.g. http://example.com
 lang: pt-BR
 timezone: America/Recife
 
