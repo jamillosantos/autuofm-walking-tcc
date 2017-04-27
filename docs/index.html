@@ -1,0 +1,50 @@
+---
+layout: default
+---
+
+<div align="right">
+  <table>
+    <tr>
+      <td><strong>Humores:</strong></td>
+  {% for category in site.categories %}
+      <td width="1" nowrap="nowrap"><a href="#" onclick="filterMood('{{ category[0] }}'); return false;">:{{ category[0] }}: {{ category[1] | size }}</a></td>
+  {% endfor %}
+      <td><a href="#" onclick="filterMood(); return false;">todos {{ site.posts | size }}</a></td>
+    </tr>
+  </table>
+</div>
+<hr />
+<script type="text/javascript">
+function filterMood(mood)
+{
+  var matches = document.getElementsByClassName('journal');
+  for (var i = 0; i < matches.length; i++)
+    matches[i].style.display = mood && 'none' || 'block';
+  if (mood)
+  {
+    matches = document.getElementsByClassName('mood-' + mood);
+    for (var i = 0; i < matches.length; i++)
+      matches[i].style.display = 'block';
+  }
+}
+</script>
+{% for post in site.posts  %}
+  {% capture this_group %}{{ post.date | date: "%B de %Y" }}{% endcapture %}
+  {% capture next_group %}{{ post.previous.date | date: "%B de %Y" }}{% endcapture %}
+
+  {% if forloop.first %}
+  <h2>{{this_group}}</h2>
+  {% endif %}
+  <div class="journal mood-{{ post.category | default: 'question' }}">
+    <h3>{{ post.date | date: "%d de %B de %Y" }} :{{ post.category | default: 'question' }}:</h3>
+    {{ post.content }}
+  {% if forloop.last %}
+  </div>
+  {% else %}
+    <hr />
+  </div>
+    {% if this_group != next_group %}
+    <h2>{{next_group}}</h2>
+    {% endif %}
+  {% endif %}
+{% endfor %}
