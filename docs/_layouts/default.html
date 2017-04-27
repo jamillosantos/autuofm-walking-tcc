@@ -12,6 +12,18 @@
     <![endif]-->
     <style>
 
+    .wrapper
+    {
+      width: auto!important;
+    }
+
+    section
+    {
+      width: auto;
+      float: left;
+      margin-left: 300px;
+    }
+
     .remainingtime
     {
       padding: 10px 15px;
@@ -42,7 +54,7 @@
         <h1>{{ site.title | default: site.github.repository_name }}</h1>
         <p>{{ site.description | default: site.github.project_tagline }}</p>
 
-        <p><img src="assets/imgs/robot-front.png" width="100%" /></p>
+        <p><img src="{{ 'assets/imgs/robot-front.png' | relative_url }}" width="100%" /></p>
 
         {% assign today = site.time | date: '%s' %}
         {% assign duedate = '2017-07-03 23:59:59' | date: '%s' %}
