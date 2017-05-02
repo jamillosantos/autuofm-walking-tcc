@@ -25,6 +25,8 @@
 %\usepackage{alg} 
 %\usepackage{hyperref}
 \usepackage{framed}
+\usepackage{gensymb}
+\usepackage{xcolor}
 
 
 % Redefinicao de instrucoes
@@ -58,6 +60,20 @@
 	\vspace{1.5mm}
 	\hrule
 	\vspace{5mm}
+}%
+
+\newenvironment{draft}{%
+	\vspace{5mm}
+	\textbf{DRAFT:}
+}{
+}%
+
+
+\newenvironment{TODO}{%
+	\color{gray}
+	\itshape
+	\textbf{TODO:}
+}{
 }%
 
 
