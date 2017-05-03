@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
     <script src="https://use.fontawesome.com/46dc13958c.js"></script>
     <meta name="viewport" content="width=device-width">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js"></script>
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -109,7 +110,35 @@
         {% endif %}
       </header>
       <section>
-        <div class="remainingtime{% if weeksUntil < 3 %} danger{% elsif weeksntil < 5 %} warning{% endif %}">
+        <hr />
+        <script type="text/javascript">
+        <!--
+        var
+          dueDate = moment('2017-07-03 23:59:59'),
+          now = moment(),
+          diff = moment.duration(dueDate.diff(now)),
+          weeksUntil = Math.floor(diff.asWeeks()),
+          daysUntil = Math.floor(diff.asDays()) % 7,
+          hoursUntil = Math.floor(diff.asHours()) % 24;
+
+        if (diff.asHours() > 0)
+        {
+          document.write(
+            '<div class="remainingtime' + (weeksUntil < 3 ? ' danger' : ( weeksUntil < 5 ? ' warning' : '' ) ) + '">'
+            + ((weeksUntil > 0) ? ' ' + weeksUntil + ' semanas' : '')
+            + ((daysUntil > 0) ? ' ' + daysUntil + ' dias' : '')
+            + ((hoursUntil > 0) ? ' ' + hoursUntil + ' horas' : '')
+            + ' até a entrega da primeira versão.</div>');
+        }
+        else
+        {
+          document.write(
+            '<div class="remainingtime danger">A versão deveria ter sido entregue a ' + Math.floor(diff.asHours()) + '.</div>');
+        }
+        // -->
+        </script>
+        <hr />
+        <div class="remainingtime{% if weeksUntil < 3 %} danger{% elsif weeksntil < 5 %} warning{% endif %}" style="display: none">
           {% if weeksUntil > 0 %}{{ weeksUntil }} semanas{% endif %}
           {% if daysUntil > 0 %}{{ daysUntil }} dias{% endif %}
           {% if hoursUntil > 0 %}{{ hoursUntil }} horas{% endif %} até a
