@@ -27,6 +27,7 @@
 \usepackage{framed}
 \usepackage{gensymb}
 \usepackage{xcolor}
+\usepackage{todonotes}
 
 
 % Redefinicao de instrucoes
@@ -50,6 +51,24 @@
 \newcommand{\writeteacher}{Prof. Dr. Eduardo Braulio}
 \newcommand{\writeteacheren}{Prof. Doc. Eduardo Braulio}
 \newcommand{\writedate}{Abril 2017}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% REMOVER ESTA LINHA PARA RESTAURAR AS MARGENS DOS TODOS %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[paperwidth=210mm,
+paperheight=297mm,
+left=50pt,
+top=50pt,
+textwidth=345pt,
+marginparsep=15pt,
+marginparwidth=125pt,
+textheight=692pt,
+footskip=50pt]
+{geometry}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\answer}[2][]
+{\todo[color=cyan, #1]{R: #2}}
 
 \newenvironment{guide}{%
 	\color{red}
@@ -214,5 +233,7 @@
 	
 	% P���gina em branco
 	\newpage
+	
+	\listoftodos
 
 \end{document}
