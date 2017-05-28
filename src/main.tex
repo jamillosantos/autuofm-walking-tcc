@@ -28,6 +28,8 @@
 \usepackage{gensymb}
 \usepackage{xcolor}
 \usepackage{todonotes}
+\usepackage{svg}
+\usepackage{tikz}
 
 
 % Redefinicao de instrucoes
@@ -52,19 +54,22 @@
 \newcommand{\writeteacheren}{Prof. Doc. Eduardo Braulio}
 \newcommand{\writedate}{Abril 2017}
 
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{\node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
+
+\graphicspath{{imagens/}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % REMOVER ESTA LINHA PARA RESTAURAR AS MARGENS DOS TODOS %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage[paperwidth=210mm,
-paperheight=297mm,
-left=50pt,
-top=50pt,
-textwidth=345pt,
-marginparsep=15pt,
-marginparwidth=125pt,
-textheight=692pt,
-footskip=50pt]
-{geometry}
+%\usepackage[paperwidth=210mm,
+%paperheight=297mm,
+%left=50pt,
+%top=50pt,
+%textwidth=345pt,
+%marginparsep=15pt,
+%marginparwidth=175pt,
+%textheight=692pt,
+%footskip=50pt]
+%{geometry}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newcommand{\answer}[2][]
