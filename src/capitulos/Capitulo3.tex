@@ -3,27 +3,53 @@
 
 ARASH (Robô Antropomórfico Aumentado com Sentido de Ser Humano), é um robô humanoide de 7,5 Kg, 1 metro de altura. Com 20 graus de liberdade (ou DOF, de \textit{degrees of freedom}), distribuídos em 6 DOF para cada perna, 3 em cada braço e 2 no pescoço.
 
+Cada vez mais, a arquitetura distribuída é utilizada na robótica. A ideia é que cada componente funcione de forma independente para evitar uma eventual falha catastrófica onde todo o sistema venha a ser derrubado. Na figura \ref{fig:SoftwareArchitecture:Overview} é possível observar os principais componentes, e o fluxo de dados entre eles, envolvidos no processo qualquer tarefa básica. Esses componentes podem ser executados em diferentes camadas do sistema. Na arquitetura, existem 3 camadas principais que podem ser descritas independentemente: A camada de software, a camada de software de baixo nível, e a camada de hardware.
+
 \begin{figure}[htb]
 	\centering
 	\includegraphics[scale=1]{imagens/svg/softwarearchitecture-flow}
 	\caption{Visão simplificada da arquitetura do sistema e seus fluxos.}
-	\label{fig:SoftwareArchitecture:SimplifiedOverview}
+	\label{fig:SoftwareArchitecture:Overview}
 \end{figure}
 
-Na arquitetura do sistema original (antes das mudanças propostas), existem 3 camadas principais que podem ser descritas independentemente: A camada de software, a camada de software de baixo nível, e a camada de hardware.
+A camada de software é executada dentro do ``controlador principal'', que é um computador \textit{mini-box PC MAXData QutePC-3001} com um processador 64 bits de dois núcleos Intel\copyright{} Celeron\copyright{} 847E (1,1GHz e 2MB de \textit{cache}), rodando o Ubuntu 14.04. Esta camada é responsável por rodar os componentes de software e enviar comandos de controle para a camada inferior de baixo nível. Por exemplo, durante uma partida de futebol, o controlador de comportamento ``jogador'' consulta o controlador de visão, que localiza a bola em relação ao robô e retorna a informação ao ``jogador'', que envia o comando de controle ao \textit{walking gait} para caminhar em direção à bola.
 
-Na figura~\ref{fig:SoftwareArchitecture:SimplifiedOverview} é possível observar os principais componentes do sistema, sua comunicação e o fluxo de dados entre cada um deles.
+A camada de software de baixo nível é responsável pelo processamento de dados da IMU, juntamente com a execução do \textit{walking gait}. Esta camada roda dentro da placa microcontroladora \textit{Robotis.Co OpenCM9.04} (com um processador \textit{32bit ARM Cortex-M3}, memória \textit{flash} de 128Kb e 20Kb de \textit{SRAM}), \textit{arduino-like}.
 
-\begin{figure}[htb]
+\section{Visão}
+
+Visão não é o foco deste trabalho. Entretanto, uma explanação geral é necessária afim de melhor entender o funcionamento geral do sistema.
+
+O controle de visão é um software que conecta-se via USB com a câmera através. De forma geral, podemos abstrair seu funcionamento em duas \textit{threads}.
+
+A primeira é o \textit{loop} principal - representada na figura \ref{fig:SoftwareArchitecture:Vision} -, onde, sequêncialmente, o controlador obtém a \textit{imagem} da câmera. Em seguida, a extração de informações é realizada. Esse processo vai depender da tarefa que o robô deve realizar - por exemplo, detectar a bola, os adversários e as linhas do campo em caso de futebol; ou detectar as linhas da pista de corrida, no caso da maratona. Em seguida, a \textit{thread} salva as informações para futuras consultas.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=1]{imagens/svg/softwarearchitecture-vision}
+	\caption{Diagrama de sequência do componente de visão.}
+	\label{fig:SoftwareArchitecture:Vision}
+\end{figure}
+
+A segunda \textit{thread} - visualizada na figura \ref{fig:SoftwareArchitecture:Software} - do controle de visão executa o sistema de comunicação, que pode ser implementado de várias maneiras - desde \textit{JSON over UDP} até um \textit{message broker} com filas de consumo. Ao receber a mensagem de solicitação das informações, esta \textit{thread} responde serializando os dados que ficaram salvas na primeira, fornecendo as informações com atraso mínimo.
+
+\begin{figure}[h!]
 	\centering
 	\includegraphics[scale=1]{imagens/svg/softwarearchitecture-software}
-	\caption{Diagrama de sequência da camada de software.}
+	\caption{Diagrama de sequência do controlador de comportamento e suas dependências.}
 	\label{fig:SoftwareArchitecture:Software}
 \end{figure}
 
-A camada de software é executada dentro do ``controlador principal'', que é um computador \textit{mini-box PC MAXData QutePC-3001} com um processador 64 bits de dois núcleos Intel\copyright{} Celeron\copyright{} 847E (1,1GHz e 2MB de \textit{cache}), rodando o Ubuntu 14.04. Esta camada é responsável por rodar os componentes de software e enviar comandos de controle para a camada inferior de baixo nível, conexão \circled{2}. Por exemplo, durante uma partida de futebol, o programa ``jogador'' ativa o sistema de visão, que localiza a bola em relação ao robô e retorna a informação ao ``jogador'', que envia o comando de controle ao \textit{walking gait} para caminhar a metade da velocidade total à frente com 32\degree{} à esquerda.
+\begin{draft}
+	Esta camada roda o \textit{walking gait} e o \textit{sistema de orientação}. Ela tem acesso direto a enviar e receber comandos dos motores e os sensores da \textit{IMU}, conectando-se ao controlador principal via USB recebendo pacotes de controle e enviando comandos para os motores em uma conexão \textit{TTL} \textit{half-duplex} a 1 Mbps.
+\end{draft}
 
-A camada de software de baixo nível é responsável pelo processamento de dados da IMU, juntamente com a execução do \textit{walking gait}. Esta camada roda dentro da placa microcontroladora \textit{Robotis.Co OpenCM9.04} (com um processador \textit{32bit ARM Cortex-M3}, memória \textit{flash} de 128Kb e 20Kb de \textit{SRAM}), \textit{arduino-like}. Esta camada roda o \textit{walking gait} e o \textit{sistema de orientação}. Ela tem acesso direto a enviar e receber comandos dos motores (conexão \circled{5}) e os sensores da \textit{IMU} (conexão \circled{6}), conectando-se ao controlador principal via USB (conexão \circled{2}) recebendo pacotes de controle e enviando comandos para os motores em uma conexão \textit{TTL} \textit{half-duplex} a 1 Mbps.
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=1]{imagens/svg/softwarearchitecture-lowlevel}
+	\caption{Diagrama de sequência do \textit{walking gait} e do leitor de orientação.}
+	\label{fig:SoftwareArchitecture:LowLevel}
+\end{figure}
 
 O \textit{walking gait} monitora a USB aguardando os comandos de controle que contém as velocidades da caminhada, enviados a partir do controlador principal. Já o componente leitor de orientação desempenha um papel importante dentro do \textit{walking gait}. Ele é o responsável pela verificação da orientação da rotação do torso, uma vez que a IMU está situada nas costas de Arash, em relação ao eixo da gravidade. Desta forma, o \textit{walking gait} faz correções nas juntas para compensar um eventual desvio na trajetória. Mais detalhes sobre a implementação deste componente serão descritos \todo{Referênciar seção especifica}nos próximos capítulos!!!
 
