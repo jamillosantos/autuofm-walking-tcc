@@ -12,7 +12,7 @@ Cada vez mais, a arquitetura distribuída é utilizada na robótica. A ideia é 
 	\label{fig:SoftwareArchitecture:Overview}
 \end{figure}
 
-A camada de software é executada dentro do ``controlador principal'', que é um computador \textit{mini-box PC MAXData QutePC-3001} com um processador 64 bits de dois núcleos Intel\copyright{} Celeron\copyright{} 847E (1,1GHz e 2MB de \textit{cache}), rodando o Ubuntu 14.04. Esta camada é responsável por rodar os componentes de software e enviar comandos de controle para a camada inferior de baixo nível. Por exemplo, durante uma partida de futebol, o controlador de comportamento ``jogador'' consulta o controlador de visão, que localiza a bola em relação ao robô e retorna a informação ao ``jogador'', que envia o comando de controle ao \textit{walking gait} para caminhar em direção à bola.
+A camada de software é executada dentro do ``controlador principal'', que é um computador \textit{mini-box PC MAXData QutePC-3001} com um processador 64 bits de dois núcleos Intel\copyright{} Celeron\copyright{} 847E (1,1GHz e 2MB de \textit{cache}), rodando o Ubuntu 14.04. Esta camada é responsável por rodar os componentes de software e enviar comandos de controle para a camada inferior de baixo nível.
 
 A camada de software de baixo nível é responsável pelo processamento de dados da IMU, juntamente com a execução do \textit{walking gait}. Esta camada roda dentro da placa microcontroladora \textit{Robotis.Co OpenCM9.04} (com um processador \textit{32bit ARM Cortex-M3}, memória \textit{flash} de 128Kb e 20Kb de \textit{SRAM}), \textit{arduino-like}.
 
@@ -22,7 +22,7 @@ Visão não é o foco deste trabalho. Entretanto, uma explanação geral é nece
 
 O controle de visão é um software que conecta-se via USB com a câmera através. De forma geral, podemos abstrair seu funcionamento em duas \textit{threads}.
 
-A primeira é o \textit{loop} principal - representada na figura \ref{fig:SoftwareArchitecture:Vision} -, onde, sequêncialmente, o controlador obtém a \textit{imagem} da câmera. Em seguida, a extração de informações é realizada. Esse processo vai depender da tarefa que o robô deve realizar - por exemplo, detectar a bola, os adversários e as linhas do campo em caso de futebol; ou detectar as linhas da pista de corrida, no caso da maratona. Em seguida, a \textit{thread} salva as informações para futuras consultas.
+A primeira é o \textit{loop} principal - representada na figura \ref{fig:SoftwareArchitecture:Vision} -, onde, sequencialmente, o controlador obtém a \textit{imagem} da câmera. Em seguida, a extração de informações é realizada. Esse processo vai depender da tarefa que o robô deve realizar - detectar a bola, os adversários e as linhas do campo em caso de futebol ou detectar as linhas guia da pista de corrida, no caso da maratona são exemplos. Em seguida, a \textit{thread} salva tudo o que foi detectado.
 
 \begin{figure}[h!]
 	\centering
@@ -31,7 +31,7 @@ A primeira é o \textit{loop} principal - representada na figura \ref{fig:Softwa
 	\label{fig:SoftwareArchitecture:Vision}
 \end{figure}
 
-A segunda \textit{thread} - visualizada na figura \ref{fig:SoftwareArchitecture:Software} - do controle de visão executa o sistema de comunicação, que pode ser implementado de várias maneiras - desde \textit{JSON over UDP} até um \textit{message broker} com filas de consumo. Ao receber a mensagem de solicitação das informações, esta \textit{thread} responde serializando os dados que ficaram salvas na primeira, fornecendo as informações com atraso mínimo.
+A segunda \textit{thread} - visualizada na figura \ref{fig:SoftwareArchitecture:Software} - do controle de visão executa o sistema de comunicação, que pode ser implementado de várias maneiras - desde \textit{JSON over UDP} até um \textit{message broker} com filas de consumo. Ao receber a mensagem de solicitação das informações, responde serializando os dados que ficaram salvos na primeira \textit{trhead}, fornecendo as informações com atraso mínimo.
 
 \begin{figure}[h!]
 	\centering
@@ -40,8 +40,10 @@ A segunda \textit{thread} - visualizada na figura \ref{fig:SoftwareArchitecture:
 	\label{fig:SoftwareArchitecture:Software}
 \end{figure}
 
+O controlador de comportamento implementa a tarefa que deve ser realizada pelo robô. Ele funciona como um gerente que coordena os outros componentes, recebendo informações e mandando comandos para ações específicas serem executadas. Na figura~\ref{fig:SoftwareArchitecture:Software} é possível observar a sequência de passos realizados pelo controlador de comportamento. Por exemplo, durante uma partida de futebol, o controlador de comportamento ``jogador'' consulta o componente de visão, que responde a posição da bola - previamente obtida durante o processo da figura~\ref{fig:SoftwareArchitecture:Vision}. Em seguida, baseado nessas informações o comportamento envia o comando ao \textit{walking gait} para caminhar na direção correta.
+
 \begin{draft}
-	Esta camada roda o \textit{walking gait} e o \textit{sistema de orientação}. Ela tem acesso direto a enviar e receber comandos dos motores e os sensores da \textit{IMU}, conectando-se ao controlador principal via USB recebendo pacotes de controle e enviando comandos para os motores em uma conexão \textit{TTL} \textit{half-duplex} a 1 Mbps.
+Esta camada roda o \textit{walking gait} e o \textit{sistema de orientação}. Ela tem acesso direto a enviar e receber comandos dos motores e os sensores da \textit{IMU}, conectando-se ao controlador principal via USB recebendo pacotes de controle e enviando comandos para os motores em uma conexão \textit{TTL} \textit{half-duplex} a 1 Mbps.
 \end{draft}
 
 \begin{figure}[h!]
