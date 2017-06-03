@@ -1,219 +1,122 @@
 % Capítulo 3
 \chapter{Arquitetura}
 
-ARASH (Robô Antropomórfico Aumentado com Sentido de Ser Humano), é um robô humanoide de 7,5 Kg, 1 metro de altura. Com 20 graus de liberdade (ou DOF, de \textit{degrees of freedom}), distribuídos em 6 DOF para cada perna, 3 em cada braço e 2 no pescoço.
+ARASH (Robô Antropomórfico Aumentado com Sentido de Ser Humano), é um robô de 7,5 Kg e 1 metro de altura. Possuindo 20 graus de liberdade (ou DOF, do inglês \textit{degrees of freedom}), ele tenta imitar a configuração humana, tanto em suas juntas quanto em suas proporções. Em suas juntas, ARASH possui motores MX-28, MX-64 e MX-106, dependendo da carga suportada. Existe um computador \textit{mini-box} que serve como controlador principal e uma placa microcontroladora \textit{OpenCM9.04} que serve de interface entre o controlador principal e os motores.
 
-Cada vez mais, a arquitetura distribuída é utilizada na robótica. A ideia é que cada componente funcione de forma independente para evitar uma eventual falha catastrófica onde todo o sistema venha a ser derrubado. Na figura \ref{fig:SoftwareArchitecture:Overview} é possível observar os principais componentes, e o fluxo de dados entre eles, envolvidos no processo qualquer tarefa básica. Esses componentes podem ser executados em diferentes camadas do sistema. Na arquitetura, existem 3 camadas principais que podem ser descritas independentemente: A camada de software, a camada de software de baixo nível, e a camada de hardware.
+\section{Visão Geral}
+\label{sec:architecture:overview}
+
+Com o passar dos antos, a arquitetura distribuída é vem sendo cada vez mais adotada na robótica. A ideia é que cada componente funcione de forma independente para evitar que uma eventual falha derrube todo o sistema. Componentes individuais podem ser adicionados, ou substituídos, a medida em que melhorias, ou novas capacidades, sejam implementadas.
 
 \begin{figure}[htb]
 	\centering
 	\includegraphics[scale=1]{imagens/svg/softwarearchitecture-flow}
 	\caption{Visão simplificada da arquitetura do sistema e seus fluxos.}
-	\label{fig:SoftwareArchitecture:Overview}
+	\label{fig:softwarearchitecture:overview}
 \end{figure}
+
+Na figura~\ref{fig:softwarearchitecture:overview} é possível observar os principais componentes, e o fluxo de dados entre eles, envolvidos no processo qualquer tarefa básica. Esses componentes podem ser executados em diferentes camadas do sistema. Na arquitetura, existem 3 camadas principais que podem ser descritas independentemente: A camada de software, a de software de baixo nível, e a de hardware.
+
+Na camada de \textit{hardware}, a mais inferior na figura~\ref{fig:softwarearchitecture:overview}, estão a câmera, a IMU e os motores utilizados nas juntas. Os motores serão melhor descritos na subseção sobre atuadores (subseção~\ref{subsec:Architecture:Atuators}). A IMU, \textit{inertial measurement unit}, que é um sensor eletrônico capaz de medir as forças sofridas por um corpo, é utilizada para ler a orientação do corpo do robô.
+
+A camada de software de baixo nível é responsável pelo processamento de dados da \textit{IMU}, juntamente com a execução do \textit{walking gait}. Esta camada roda dentro da placa microcontroladora \textit{Robotis.Co OpenCM9.04} (com um processador \textit{32bit ARM Cortex-M3}, memória \textit{flash} de 128Kb e 20Kb de \textit{SRAM}), \textit{arduino-like}.
 
 A camada de software é executada dentro do ``controlador principal'', que é um computador \textit{mini-box PC MAXData QutePC-3001} com um processador 64 bits de dois núcleos Intel\copyright{} Celeron\copyright{} 847E (1,1GHz e 2MB de \textit{cache}), rodando o Ubuntu 14.04. Esta camada é responsável por rodar os componentes de software e enviar comandos de controle para a camada inferior de baixo nível.
 
-A camada de software de baixo nível é responsável pelo processamento de dados da IMU, juntamente com a execução do \textit{walking gait}. Esta camada roda dentro da placa microcontroladora \textit{Robotis.Co OpenCM9.04} (com um processador \textit{32bit ARM Cortex-M3}, memória \textit{flash} de 128Kb e 20Kb de \textit{SRAM}), \textit{arduino-like}.
-
-\section{Visão}
+\subsection{Visão}
 
 Visão não é o foco deste trabalho. Entretanto, uma explanação geral é necessária afim de melhor entender o funcionamento geral do sistema.
-
-O controle de visão é um software que conecta-se via USB com a câmera através. De forma geral, podemos abstrair seu funcionamento em duas \textit{threads}.
-
-A primeira é o \textit{loop} principal - representada na figura \ref{fig:SoftwareArchitecture:Vision} -, onde, sequencialmente, o controlador obtém a \textit{imagem} da câmera. Em seguida, a extração de informações é realizada. Esse processo vai depender da tarefa que o robô deve realizar - detectar a bola, os adversários e as linhas do campo em caso de futebol ou detectar as linhas guia da pista de corrida, no caso da maratona são exemplos. Em seguida, a \textit{thread} salva tudo o que foi detectado.
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[scale=1]{imagens/svg/softwarearchitecture-vision}
 	\caption{Diagrama de sequência do componente de visão.}
-	\label{fig:SoftwareArchitecture:Vision}
+	\label{fig:softwarearchitecture:vision}
 \end{figure}
 
-A segunda \textit{thread} - visualizada na figura \ref{fig:SoftwareArchitecture:Software} - do controle de visão executa o sistema de comunicação, que pode ser implementado de várias maneiras - desde \textit{JSON over UDP} até um \textit{message broker} com filas de consumo. Ao receber a mensagem de solicitação das informações, responde serializando os dados que ficaram salvos na primeira \textit{trhead}, fornecendo as informações com atraso mínimo.
+O controle de visão é um software que conecta-se via USB com a câmera, analisando as imagens e extraindo informações relevantes à execução da tarefa do robô. De forma geral, podemos abstrair seu funcionamento em duas \textit{threads} distintas:
+
+A primeira é o \textit{loop} principal -- representada na figura \ref{fig:SoftwareArchitecture:Vision} --, onde, sequencialmente, o controlador obtém a imagem da câmera. Em seguida, a extração de informações é realizada. Esse processo depende da tarefa que o robô deve realizar; tais como detectar a bola, os adversários e as linhas do campo, em caso de futebol ou detectar as linhas guia da pista de corrida no caso da maratona. Em seguida, tudo o que foi encontrado é salvo para futuras consultas até que a próxima iteração ocorra e os dados sejam atualizados.
+
+A segunda \textit{thread}, visualizada na figura~\ref{fig:softwarearchitecture:software}, do controle de visão executa o sistema de comunicação que pode ser implementado de várias maneiras, desde objetos \textit{JSON} sendo transmitidos via \textit{UDP} até um \textit{message broker} com filas de consumo. Ao receber a mensagem de solicitação das informações, responde serializando os dados que ficaram salvos na primeira \textit{thread}, fornecendo as informações com atraso mínimo.
+
+\subsection{Controlador de Comportamento}
+
+O controlador de comportamento implementa a tarefa que deve ser realizada pelo robô. Ele funciona como um gerente que coordena outros componentes, recebendo informações e enviando comandos com ações específicas serem executadas. Na figura~\ref{fig:softwarearchitecture:software} é possível observar a sequência de passos realizados pelo controlador de comportamento.
+
+No caso de uma partida de futebol, o controlador de comportamento ``jogador'' consulta o componente de visão, que responde a posição da bola, previamente obtida durante o processo da figura~\ref{fig:softwarearchitecture:vision}. Em seguida, baseado nessas informações o comportamento envia o comando ao \textit{walking gait} para caminhar na direção correta.
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[scale=1]{imagens/svg/softwarearchitecture-software}
 	\caption{Diagrama de sequência do controlador de comportamento e suas dependências.}
-	\label{fig:SoftwareArchitecture:Software}
+	\label{fig:softwarearchitecture:software}
 \end{figure}
 
-O controlador de comportamento implementa a tarefa que deve ser realizada pelo robô. Ele funciona como um gerente que coordena os outros componentes, recebendo informações e mandando comandos para ações específicas serem executadas. Na figura~\ref{fig:SoftwareArchitecture:Software} é possível observar a sequência de passos realizados pelo controlador de comportamento. Por exemplo, durante uma partida de futebol, o controlador de comportamento ``jogador'' consulta o componente de visão, que responde a posição da bola - previamente obtida durante o processo da figura~\ref{fig:SoftwareArchitecture:Vision}. Em seguida, baseado nessas informações o comportamento envia o comando ao \textit{walking gait} para caminhar na direção correta.
+\subsection{\textit{Walking Gait} e Leitor de Orientação}
 
-\begin{draft}
-Esta camada roda o \textit{walking gait} e o \textit{sistema de orientação}. Ela tem acesso direto a enviar e receber comandos dos motores e os sensores da \textit{IMU}, conectando-se ao controlador principal via USB recebendo pacotes de controle e enviando comandos para os motores em uma conexão \textit{TTL} \textit{half-duplex} a 1 Mbps.
-\end{draft}
+O componente \textit{walking gait} coordena e executa a caminhada. Ele monitora a USB aguardando os comandos de controle que contém as velocidades da caminhada, enviados a partir do controlador principal.
 
-\begin{figure}[h!]
+O componente leitor de orientação desempenha um papel importante dentro do \textit{walking gait}. Ele é o responsável pela verificação da orientação da rotação do torso, uma vez que a \textit{IMU} está situada nas costas de Arash. Desta forma, o \textit{walking gait} faz correções nas juntas para compensar um eventual desvio na trajetória.
+
+\begin{figure}[b!]
 	\centering
 	\includegraphics[scale=1]{imagens/svg/softwarearchitecture-lowlevel}
 	\caption{Diagrama de sequência do \textit{walking gait} e do leitor de orientação.}
-	\label{fig:SoftwareArchitecture:LowLevel}
+	\label{fig:softwarearchitecture:lowlevel}
 \end{figure}
 
-O \textit{walking gait} monitora a USB aguardando os comandos de controle que contém as velocidades da caminhada, enviados a partir do controlador principal. Já o componente leitor de orientação desempenha um papel importante dentro do \textit{walking gait}. Ele é o responsável pela verificação da orientação da rotação do torso, uma vez que a IMU está situada nas costas de Arash, em relação ao eixo da gravidade. Desta forma, o \textit{walking gait} faz correções nas juntas para compensar um eventual desvio na trajetória. Mais detalhes sobre a implementação deste componente serão descritos \todo{Referênciar seção especifica}nos próximos capítulos!!!
-
-Na design original do time AUT-UofM, a \textit{OpenCM9.04} é responsável por executar o componente de caminhada, coordenando os movimentos das juntas de acordo com parâmetros recebidos através da USB (enviados pelo controlador principal). Desta forma, os dados de leitura sobre a posição das juntas ou sobre a orientação, obtido pelos sensores da IMU, não são necessários fora da placa microcontroladora.
-
 \subsection{Graus de Liberdade e Atuadores}
+\label{subsec:architecture:Atuators}
 
-Em Arash, todos os atuadores são produzidos pela Robotics.Co. Porém, devido a variação de carga nas diversas juntas, foram utilizados modelos diferentes da mesma série MX, esta opção diminui o custo final do robô.
+\todo{Adicionar um parágrafo introdutório.}
+PARAGRAFO INTRODUTÓRIO.
 
 Tão importante quanto a configuração das juntas é a orientação dos atuadores para que os cálculos funcionem como o esperado.
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[scale=0.6]{imagens/svg/arash-schematics}
-	\textsf{\caption{Esquema de orientação dos atuadores de Arash}}
-	\label{fig:ArashSchematics}
-\end{figure}
-
-Na figura acima, podemos observar o esquema de orientação dos atuadores em cada junta. No diagrama encontram-se 4 símbolos com significados diferentes:
-
-O pequeno círculo preto preenchido, representa apenas o fim de cadeia. Assim, estes símbolos representam as mãos, que não possuem atuadores, e a ponta da cabeça, onde fica apenas a câmera. Adicionalmente, os "círculo vazado com outro círculo preto preenchido dentro" e os diamantes representam atuadores.
-
-No caso do "círculo vazado com outro círculo preto preenchido dentro", o atuador será referenciado como "frontal" e propicia rotação orientada pelo eixo X (no plano YZ), que está aponta para o leitor (para fora do papel).
-
-Nos diamantes, o atuador está apontando para a marcação preta na ponta do diamante. Atuadores que apontam para direita ou esquerda, são chamados de horizontais. Eles apresentação rotação com base no eixo Y. Já os que apontam para cima ou baixo são chamados de atuadores transversais que representação transformações na rotação no eixo Z.
-
-\todo{Ordem imagens confusa!?}
-\begin{figure}[htb]
-	\centering
-	\includegraphics[scale=0.6]{imagens/svg/actuators-orientation}
-	\textsf{\caption{Sentido do movimentos dos atuadores}}
+	\includegraphics[scale=1]{imagens/svg/actuators-orientation}
+	\caption{Orientação dos movimentos dos atuadores}
 	\label{fig:ActuatorsOrientation}
 \end{figure}
 
-\todo{Referenciar ao paper de descrição de Arash}
-Estas orientações são importantes durante os cálculos dos ângulos enviados às juntas. Por exemplo, caso a orientação do cotovelo esteja trocada, no cálculo ou no robô real, qualquer ângulo enviado a ele resultará em uma rotação para trás, um movimento que o cotovelo humano não é capaz de realizar.
+A figura~\ref{fig:ActuatorsOrientation} é possível ver as possíveis orientações dos atuadores. Elas são referenciadas ao longo do trabalho como frontal, lateral e transversal.
 
-\todo{Conectar estes dois parágrafos}
-No pescoço, onde a carga é bem leve, 'MX-28' são suficientes. Dois atuadores, um na posição transversal (o atuador mais baixo) que fornece o movimento panorâmico a cabeça e outro na posição horizontal, fornecendo o movimento de inclinação vertical da cabeça.
+Atuadores com orientação frontal -- ou simplesmente, atuadores frontais -- propiciam rotação orientada pelo eixo $X$, que está aponta para o leitor (para fora do papel). Esse tipo de rotação também é referida como \textit{roll}.
 
-Nos braços, que podem sofrer uma carga maior, atuadores 'MX-64' são utilizados. Isso é importante já que existem modalidades de competições, como o levantamento de peso, que testam a capacidade do carregamento de cargas.
+Atuadores laterais apontam para direita ou esquerda. Eles apresentam rotação com base no eixo $Y$ (plano $XZ$), também conhecida como rotação \textit{pitch}. Analogamente, atuadores transversais apontam para cima ou baixo, com base no eixo $Z$ (plano $XY$), com movimento de rotação conhecido como \textit{yaw}.
 
-Para as pernas, foram utilizados atuadores 'MX-106' que são mais poderosos que os anteriores. Entretanto, na fase de projeto, simulações mostraram que durante o movimento de levantar-se do chão (em caso da recuperação de uma possível queda), o torque nas juntas do joelho era levado ao máximo suportado pelo 'MX-106', podendo assim levar este motor à falha. Desta forma, 2 atuadores sincronizados passaram a formar esta junta, afim de proporcionar um maior torque para os movimentos necessários. Esta junta dupla não oferece nenhum impacto na implementação, já que os motores da série 'MX-106' oferecem a capacidade de serem ligados e sincronizados via \textit{hardware} - assim, a nível de software, controla-se apenas 1 único atuador. Desta forma, apesar das 20 DOF, Arash possui 22 motores.
+Na figura~\ref{fig:ArashSchematics}, observa-se o esquema de orientação doas atuadores aplicada no diagrama das juntas de Arash. Ainda na mesma figura, os ``triângulos pretos preenchidos'' representam apenas o fim de uma cadeia de atuadores. Assim, estes símbolos representam as mãos, que não possuem atuadores, e a ponta da cabeça, onde encontra-se a câmera. 
 
-\section{Arquitetura de Software pré-solução}
+Estas orientações são importantes durante os cálculos dos ângulos enviados às juntas. Já que a inconsistência do modelo matemático e o robô causará inversão de movimentos durante a caminhada, causando movimentos estranhos e possíveis danos.
 
+Em Arash, todos os atuadores utilizados são produzidos pela Robotics.Co. Porém, devido a variação de carga nas diversas juntas, foram utilizados diferentes  modelos da série MX. Esta decisão de projeto diminui bastante o custo final do robô.
 
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=1]{imagens/svg/arash-schematics}
+	\caption{Diagrama de orientação dos atuadores de Arash}
+	\label{fig:ArashSchematics}
+\end{figure}
 
-\section{Modificações na \textit{OpenCM9.04}}
+No pescoço, onde a carga é bem leve, ``MX-28'' são suficientes. Dois atuadores, um na posição transversal (o atuador mais baixo) que fornece o movimento panorâmico a cabeça e outro na posição horizontal, fornecendo o movimento de inclinação vertical da cabeça.
 
-Na implementação da solução deste trabalho a geração das trajetórias do \textit{walking gait} será transferida da \textit{OpenCM9.04} para o controlador principal. Entretanto, a placa microcontroladora ainda terá um papel crucial dentro da nova implementação.
+Nos braços, que podem sofrer uma carga maior, atuadores ``MX-64'' são utilizados. Isso é importante já que existem modalidades de competições, como o levantamento de peso, que testam a capacidade do carregamento de cargas.
 
+Para as pernas, foram utilizados atuadores ``MX-106'' que são mais poderosos que os anteriores. Entretanto, na fase de projeto, simulações mostraram que durante o movimento de levantar-se do chão (em caso da recuperação de uma possível queda), o torque nas juntas do joelho era levado ao máximo suportado pelo ``MX-106'', podendo assim levar este motor à falha. Desta forma, 2 atuadores sincronizados passaram a formar esta junta, afim de proporcionar dividir a força necessária entre dois motores. Esta junta dupla não oferece nenhum impacto na implementação, já que os motores da série ``MX-106'' oferecem a capacidade de serem ligados e sincronizados via \textit{hardware}. Assim, a nível de software controla-se apenas 1 único atuador. Desta forma, apesar das 20 DOF, Arash possui 22 motores.
 
-\begin{guide}
-Detalhar arquitetura.
-\end{guide}
+\section{A nova arquitetura}
 
-\begin{guide}
-Detalhar componentes.
-\end{guide}
+De acordo com os problemas já apresentados, esta seção irá apresentar e justificar as mudanças realizadas na arquitetura original apresentada na seção~\ref{sec:architecture:overview}.
 
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=1]{imagens/svg/softwarearchitecture-newproposal}
+	\caption{Diagrama de orientação dos atuadores de Arash}
+	\label{fig:softwarearchitecture:newproposal}
+\end{figure}
 
-\begin{itemize}
-   \item ser claro, preciso, direto, objetivo e conciso, utilizando frases
-   curtas e evitando ordens inversas desnecessárias;
-   \item construir períodos com no máximo duas ou três linhas, bem como
-   parágrafos com cinco linhas cheias, em média, e no máximo oito (ou seja, não
-   construir parágrafos e períodos muito longos, pois isso cansa o(s) leitor(es)
-   e pode fazer com que ele(s) percam a linha de raciocínio desenvolvida);
-   \item a simplicidade deve ser condição essencial do texto; a simplicidade do
-   texto não implica necessariamente repetição de formas e frases desgastadas,
-   uso exagerado de voz passiva (como \textit{será iniciado}, \textit{será
-   realizado}), pobreza vocabular etc. Com palavras conhecidas de todos, é
-   possível escrever de maneira original e criativa e produzir frases elegantes,
-   variadas, fluentes e bem alinhavadas;
-   \item adotar como norma a ordem direta, por ser aquela que conduz mais
-   facilmente o leitor à essência do texto, dispensando detalhes irrelevantes e
-   indo diretamente ao que interessa, sem ``rodeios'' (verborragias);
-   \item não começar períodos ou parágrafos seguidos com a mesma palavra, nem
-   usar repetidamente a mesma estrutura de frase;
-   \item desprezar as longas descrições e relatar o fato no menor número
-   possível de palavras;
-   \item recorrer aos termos técnicos somente quando absolutamente
-   indispensáveis e nesse caso colocar o seu significado entre parênteses (ou
-   seja, não se deve admitir que todos os que lerão o trabalho já dispõem de
-   algum conhecimento desenvolvido no mesmo);
-   \item dispensar palavras e formas empoladas ou rebuscadas, que tentem
-   transmitir ao leitor mera ideia de erudição (até mesmo às vezes ilusória);
-   \item não perder de vista o universo vocabular do leitor, adotando a seguinte
-   regra prática: \textit{nunca escrever o que não se diria};
-   \item termos coloquiais ou de gíria devem ser usados com extrema necessidade
-   (ou mesmo nem serem utilizados) e apenas em casos muito especiais, para não
-   darem ao leitor a ideia de vulgaridade e descaracterizar o trabalho;
-   \item ser rigoroso na escolha das palavras do texto, desconfiando dos
-   sinônimos perfeitos ou de termos que sirvam para todas as ocasiões; em geral,
-   há uma palavra para definir uma situação;
-   \item encadear o assunto de maneira suave e harmoniosa, evitando a criação de
-   um texto onde os parágrafos se sucedem uns aos outros como compartimentos
-   estanques, sem nenhuma fluência entre si;
-   \item ter um extremo cuidado durante a redação do texto, principalmente com
-   relação às regras gramaticais e ortográficas da língua; geralmente todo o
-   texto é escrito na forma impessoal do verbo, não se utilizando, portanto, de
-   termos em primeira pessoa, seja do plural ou do singular.
-\end{itemize}
+A figura~\ref{fig:softwarearchitecture:newproposal} mostra o \textit{walking gait} em sua nova camada, funcionando dentro do controlador principal, e um novo compontente chamado \textit{proxy} é apresentado como interface entre os motores e o \textit{walking gait}.
 
-Continução do texto.
-
-
-\section{Seção 1}
-
-Teste de tabela.
-
-\begin{table}[!htb]
-   \textsf{\caption{Tabela sem sentido.}}
-   \centering
-   \medskip
-   \begin{tabular}{c|p{4cm}}
-      \hline
-      \textbf{Título Coluna 1} & \textbf{Título Coluna 2} \\
-      \hline
-      Texto curto & Texto mais extenso, que requer mais de uma linha \\
-      \hline
-      \label{tab:TabelaSemSentido}
-   \end{tabular}
-\end{table}
-
-
-\section{Seção 2}
-
-Seção 2
-
-
-\subsection{Subseção 2.1}
-
-Referência à tabela definida no início: \ref{tab:TabelaSemSentido}
-
-
-\subsection{Subseção 2.2}
-
-Texto a ser enumerado.
-
-\begin{enumerate}
-   \item Item 1
-   \item Item 2, com nota explicativa\footnote{Nota explicativa}
-   \item Item 3
-\end{enumerate}
-
-
-\section{Seção 3}
-
-Texto antes de equação.
-
-\begin{equation}
-   x = y + z
-\end{equation}
-
-Outra maneira de se usar equação.
-
-$ \forall \pi : \pi \hookrightarrow \gamma $
-
-Texto depois de equação.
-
-\section{Seção 4}
-
-Exemplo de código
+O componente \textit{proxy} implementa a comunicação com o controlador principal via USB @ 1Mbps.
