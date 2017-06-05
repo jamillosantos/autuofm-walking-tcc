@@ -108,15 +108,53 @@ Para as pernas, foram utilizados atuadores ``MX-106'' que são mais poderosos qu
 
 \section{A nova arquitetura}
 
-De acordo com os problemas já apresentados, esta seção irá apresentar e justificar as mudanças realizadas na arquitetura original apresentada na seção~\ref{sec:architecture:overview}.
+De acordo com os problemas e solução já discutido em seções anteriores, esta seção irá apresentar as mudanças realizadas na arquitetura original apresentada na seção~\ref{sec:architecture:overview}.
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[scale=1]{imagens/svg/softwarearchitecture-newproposal}
-	\caption{Diagrama de orientação dos atuadores de Arash}
+	\caption{Diagrama de orientação dos atuadores de Arash.}
 	\label{fig:softwarearchitecture:newproposal}
 \end{figure}
 
-A figura~\ref{fig:softwarearchitecture:newproposal} mostra o \textit{walking gait} em sua nova camada, funcionando dentro do controlador principal, e um novo compontente chamado \textit{proxy} é apresentado como interface entre os motores e o \textit{walking gait}.
+A figura~\ref{fig:softwarearchitecture:newproposal} mostra o \textit{walking gait} agora na camada de software, funcionando dentro do controlador principal, e um novo compontente chamado \textit{proxy} é apresentado como interface os componentes de hardware e o \textit{walking gait}. O papel do novo componente é de servir de \textit{proxy} enviando comandos recebidos do controlador principal aos motores e também receber a orientação do componente leitor de orientação e fornecê-la ao controlador principal.
 
-O componente \textit{proxy} implementa a comunicação com o controlador principal via USB @ 1Mbps.
+O controlador de comportamento continua a enviar os comandos de controle ao \textit{walking gait}. Porém, ao invés de usar \todo{Especificar esses comandos na seção onde fala sobre esses comandos}comandos binários via USB, agora utiliza objetos serializados via \textit{JSON} \todo{Justificar por que via rede}via rede. 
+
+Entre o \textit{walking gait} e o \textit{proxy} a comunicação ocorre via USB @ 1 Mbps. Comandos de controle utilizando o \textit{dynamixel protocol 1.0} são gerados e enviados diretamente do \textit{walking gait} ao \textit{proxy}, que apenas os encaminha aos motores. Esta estratégia foi adotada para habilitar a possibilidade da utilização de motores de diferentes tipos. Assim, apenas o \textit{walking gait} é responsável pela geração de destes comandos específicos de cada motor enquanto o \textit{proxy} apenas os encaminha.
+
+Na camada de software de baixo nível, o leitor de orientação fornece os dados de orientação ao \textit{proxy} que encarrega-se de disponibiliza-los ao \textit{walking gait}.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=1]{imagens/svg/softwarearchitecture-newproposal-sequence}
+	\caption{Diagrama de sequência simplificado com as modificações na arquitetura.}
+	\label{fig:softwarearchitecture:newproposal:sequence}
+\end{figure}
+
+Na figura~\ref{fig:softwarearchitecture:newproposal:sequence}, é possível observar o diagrama de sequência com os componentes que foram atingidos pela mudança na arquitetura.
+
+Nessa nova versão da arquitetura os cálculos dos ângulos das juntas são realizados pela nova implementação do \textit{walking gait}. Para tanto, ele precisa dos dados de orientação que devem ser fornecidos pelo componente leitor de orientação, que ainda encontra-se dentro da \textit{OpenCM9.04}. Após os cálculos realizados agora o \textit{walking gait} deve comunicar-se com o \textit{proxy} que encaminhará os novos ângulos aos motores.
+
+\section{\textit{Walking gait}}
+
+Nesta seção detalhes arquiteturais da implementação do \textit{walking gait} serão descritos.
+
+O \textit{walking gait} é o componente que coordena a caminhada. Ele mantém o estado do robô, sabendo onde cada perna encontra-se e o seu estágio durante a caminhada. Desta forma, quando algum evento de perturbação, ou de ajuste, é disparado o \textit{walking gait} inicia a atualização das juntas a partir do estado atual. Assim, podemos descrever a caminhada como um evento contínuo no tempo.
+
+Para realizar a tarefa de forma adequada, o componente faz uso de multi-processamento. Três \textit{threads} dentro do componente são responsáveis por tarefas específicas essenciais ao complemento do comportamento geral da caminhada: A \textit{thread} de rede, a \textit{thread} atualização dos motores e a \textit{thread} principal.
+
+\subsection{\textit{Thread} principal: Da geração da trajetória até a aplicação às juntas}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.4]{imagens/svg/walkinggait-domain}
+	\caption{Diagrama de domínio do \textit{walking gait}.}
+	\label{fig:walkinggait:domain}
+\end{figure}
+
+A figura~\ref{fig:walkinggait:domain} mostra o diagrama de domínio das classes relevantes aos dados que o componente manipula. Nela podemos ver a classe $Humanoid$ é uma agregação de diversas outras classes que representam cada parte de Arash. É possível também observar que nas classes $Head$, $Arm$, $Hip$, $Knee$, $Foot$ existem so dados ângulo e velocidade. Isso se dá pois o componente utiliza essas informações para calcular o próximo estado do sistema em caso de algum distúrbio. Nota-se também, que a classe $Leg$ aparece de forma ambígua, já que existem as definições de $Hip$, $Knee$ e $Foot$. Porém, a classe $Leg$ representa os dados da cinemática inversa de uma perna, enquanto as demais classes representam o estado atual das partes que representam. Daí também parte a variação nos tipos de dados dos ângulos e velocidades apresentados: Nos casos das partes utilizando os 
+
+\subsection{Servidor de controle}
+
+A \textit{thread} de rede roda um servidor \textit{UDP} que aceita objetos serializandos em \textit{JSON} contendo informações de controle.
