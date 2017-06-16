@@ -3,6 +3,7 @@
 \label{ch:Math}
 
 \begin{guide}
+<<<<<<< HEAD
 	Detalhar implementação do walking gait
 \end{guide}
 
@@ -39,6 +40,73 @@ A \textit{thread} de rede roda um servidor \textit{UDP} que aceita objetos seria
 
 
 
+=======
+	Detalhar matemática dos movimentos.
+\end{guide}
+
+\begin{draft}
+	Este capítulo descreve todo o processo do cálculo das juntas.
+\end{draft}
+
+\section{Cálculo da orientação}
+
+\begin{guide}
+	Explicar os métodos utilizados para calcular a orientação.
+\end{guide}
+
+\section{Geração das trajetórias}
+
+Para caminhar, Arash move suas juntas de uma forma sincronizada mantendo o equilíbrio. Cada passo é planejado e possíveis perturbações são compensadas o mais breve possível afim de manter a trajetória e evitar quedas. O processo de caminhada é dividido em ciclos. Cada ciclo é dado pelo movimentos de passo da perna esquerda seguido pelo movimento da perna direita. A cada momento no tempo do ciclo, as juntas do quadril, joelhos e pés tem o seu estado definido.
+
+O método para geração da caminhada adotado possui trajetórias pré-definidas dos pés de acordo com o ciclo da caminhada. Assim, no início do processo calcula-se a posição, e orientação, do pé para cada tempo $t$.
+
+A equação~\ref{eq:normalized_time} mostra a definição de $t$ como o tempo normalizado decorrido desde o início do ciclo. $tempo{decorrido}$ é o tempo decorrido, em milissegundos, desde o início do ciclo corrente e $tempo{total}$ é o tempo total, em milissegundos, de cada ciclo. 
+
+\begin{equation}
+t = tempo_{decorrido} / tempo_{total}
+\label{eq:normalized_time}
+\end{equation}
+
+As informações geradas pela trajetória que os pés devem percorrer em cada ciclo. Essa trajetória, bem como o ciclo, são definidas no tempo gerando 4 dimensões: As 3 dimensões de posição $T_x$, $T_y$ e $T_z$; com mais um componente de rotação \textit{yaw} do pé $T_{yaw}$.
+
+Com as informações geradas pela trajetória
+
+Para o controlar a direção da caminhada, 3 parâmetros no controle são necessários: $V_x$, $V_y$, $V_\omega$. Onde $V_x$ é a velocidade para frente ou para trás com valores positivos para a frente; $V_y$ é a velocidade lateral com onde passos para o lado são definidos com valores positivos implicando em movimentos laterais à direita; e, finalmente, $V_\omega$ é a velocidade de rotação por passo com valores positivos indicando rotação à direita.
+
+\begin{equation}
+	-1.0 <= V_x <= 1.0
+	\hspace{5mm},\hspace{5mm}
+	-1.0 <= V_y <= 1.0
+	\hspace{5mm},\hspace{5mm}
+	-1.0 <= V_\omega <= 1.0
+	\label{eq:velocities_range}
+\end{equation}
+
+Valores normalizados entre $-1.0$ e $1.0$ são utilizados para indicar as velocidades. Significando $0.0$ como o valor de velocidade nula, ou sem movimento, $1.0$ o valor de velocidade máxima para sentido ``A'' e $-1.0$ o valor de velocidade máxima porém no sentido oposto ao ``A''. Valores normalizados foram adotados para abstrair valores de velocidades absolutos já que futuras aplicações deste trabalho podem utilizar diferentes configurações de robôs. Desta forma, o controlador de comportamento pode abstrair a configuração do robô que está rodando-o e enviar velocidades relativas.
+
+\begin{equation}
+	T_{leg}(t) = 
+	\begin{cases}
+		
+	\end{cases}
+\end{equation}
+
+\begin{guide}
+	Falar sobre o processo do cálculo de forma geral.
+\end{guide}
+
+\begin{guide}
+	Detalhar geração das trajetórias.
+\end{guide}
+
+\begin{guide}
+	Detalhar a inverse kinematics.
+\end{guide}
+
+\begin{guide}
+	Detalhar a inverse kinematics.
+\end{guide}
+>>>>>>> 3617d622a0e3a1343b300e7485d0c85e05d2002e
 
 \section{Seção 1}
 \label{sec:Orientacao}
