@@ -4,6 +4,6 @@ for f in imagens/svg/*.svg; do
 	pngimage="${f%.*}.png"
 	echo "Exporting: $f to $pdfimage"
 	inkscape -D -z "--file=$f" "--export-pdf=$pdfimage" --export-latex
-	inkscape -D -z "--file=$f" "--export-png=$pngimage" -w=2000
+	#inkscape -D -z "--file=$f" "--export-png=$pngimage" -w=2000
 done
 mv imagens/svg/*.png imagens/png
