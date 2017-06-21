@@ -92,7 +92,7 @@ Atuadores com orientação frontal -- ou simplesmente, atuadores frontais -- pro
 
 Atuadores laterais apontam para direita ou esquerda. Eles apresentam rotação com base no eixo $Y$ (plano $XZ$), também conhecida como rotação \textit{pitch}. Analogamente, atuadores transversais apontam para cima ou baixo, com base no eixo $Z$ (plano $XY$), com movimento de rotação conhecido como \textit{yaw}.
 
-Na figura~\ref{fig:ArashSchematics}, observa-se o esquema de orientação dos atuadores aplicada no diagrama das juntas de Arash. Ainda na mesma figura, os ``triângulos pretos preenchidos'' representam apenas o fim de uma cadeia de atuadores. Assim, estes símbolos representam as mãos, que não possuem atuadores, e a ponta da cabeça, onde encontra-se a câmera. 
+Na figura~\ref{fig:architecture:arash:actuators_orientations}, observa-se o esquema de orientação dos atuadores aplicada no diagrama das juntas de Arash. Ainda na mesma figura, os ``triângulos pretos preenchidos'' representam apenas o fim de uma cadeia de atuadores. Assim, estes símbolos representam as mãos, que não possuem atuadores, e a ponta da cabeça, onde encontra-se a câmera. 
 
 Estas orientações são importantes durante os cálculos dos ângulos enviados às juntas. Já que a inconsistência do modelo matemático e o robô físico causa inversão de movimentos durante a caminhada, causando reações inesperadas e possíveis danos.
 
@@ -102,7 +102,7 @@ Em Arash, todos os atuadores utilizados são produzidos pela Robotics.Co. Porém
 	\centering
 	\includegraphics[scale=1]{imagens/svg/arash-schematics}
 	\caption{Diagrama de orientação dos atuadores de Arash}
-	\label{fig:ArashSchematics}
+	\label{fig:architecture:arash:actuators_orientations}
 \end{figure}
 
 No pescoço, onde a carga é bem leve, ``MX-28'' são suficientes. Dois atuadores, um na posição transversal (o atuador mais baixo) que fornece o movimento panorâmico a cabeça e outro na posição horizontal, fornecendo o movimento de inclinação vertical da cabeça.
