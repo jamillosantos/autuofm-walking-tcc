@@ -4,29 +4,43 @@
 
 \todo{Falar sobre walking gait omnidirecional}
 \todo{Citar o ZMP}
-Para caminhar, Arash move suas juntas de uma forma sincronizada mantendo o equilíbrio. Cada passo é planejado e possíveis perturbações são compensadas o mais breve possível afim de preservar a trajetória e evitar quedas. O processo de caminhada é dividido em ciclos. Cada ciclo é dado pelo movimentos de passo da perna esquerda seguido pelo movimento da perna direita. A cada momento no tempo do ciclo, levando em consideração também outras variáveis, as trajetórias fornecem a posição e orientação dos pés do robô.
-
-O conceito de caminhada omnidirecional envolve o controle através de 3 velocidades: $V_x$, $V_y$, $V_\omega$. Onde $V_x$ é a velocidade em direção à frente, com valores positivos para a frente e negativos para caminhar de costas; $V_y$ é a velocidade lateral com onde passos para o lado são definidos com valores positivos implicando em movimentos laterais à direita; e, finalmente, $V_\omega$ é a velocidade de rotação por passo com valores positivos indicando rotação também à direita.
+Para caminhar, Arash move suas juntas de uma forma sincronizada mantendo o equilíbrio. É um processo contínuo onde cada passo é planejado e possíveis perturbações são compensadas, o mais breve possível, afim de preservar a trajetória e evitar quedas. O processo de caminhada é dividido em ciclos. Cada ciclo é dado pelo movimentos de passo da perna direita seguido pelo movimento da perna esquerda. A cada momento no tempo do ciclo, levando em consideração também outras variáveis, as trajetórias fornecem a posição e orientação dos pés do robô. A frequência de cada ciclo é definida por um relógio central definido no intervalo exibido na equação~\ref{eq:math:centraclock}, sendo $t$ o tempo do ciclo atual da caminhada.
 
 \begin{equation}
--1.0 <= V_x <= 1.0
+	\label{eq:math:centraclock}
+	0 \leq t < \pi
+\end{equation}
+
+No conceito de caminhada omnidirecional são utilizadas 3 velocidades afim de controlar a direção e velocidade do robô. $V_x$ é a velocidade em direção à frente, com valores positivos para a frente e negativos para caminhar de costas. $V_y$ é a velocidade lateral com onde passos para o lado são definidos com valores positivos implicando em movimentos laterais à direita. $V_\omega$ é a velocidade de rotação por passo com valores positivos indicando rotação também à direita.
+
+Na figura~\ref{fig:math:velocities} é possível observar o diagrama com as posições dos pés e torso de Arash. Em azul estão ambos os pés e torso de Arash no início do processo de caminhada, quando $t$ é $0$. Em cinza, é possível ver a observar o pé direito e sua posição projetada quando $t$ vale $\pi$ (ou seja, metade do ciclo). Nota-se o deslocamento frontal em $V_x$, um deslocamento lateral em $V_y$ e um deslocamento angular em $V_\omega$ do torso, bem como do pé direito (afetado pela primeira metade do ciclo).
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=1]{imagens/svg/velocities-diagram}
+	\caption{Diagrama da direção das velocidades da caminhada omnidirecional}
+	\label{fig:math:velocities}
+\end{figure}
+
+Valores normalizados entre $-1.0$ e $1.0$ são utilizados para indicar as velocidades. Significando $0.0$ como o valor de velocidade nula, ou sem movimento, $1.0$ o valor de velocidade máxima e $-1.0$ o valor de velocidade máxima no sentido oposto. Valores normalizados foram adotados para abstrair valores de velocidades absolutos já que futuras aplicações deste trabalho podem utilizar diferentes configurações de robôs. Desta forma, o controlador de comportamento pode abstrair a configuração do robô que está rodando-o e enviar velocidades relativas. Adicionalmente, valores normalizados provém a integração perfeita entre as funções trigonométricas à definição das trajetórias senoidais adotadas por \textit{Kamiri et al}.
+
+\begin{equation}
+-1.0 \leq V_x \leq 1.0
 \hspace{5mm},\hspace{5mm}
--1.0 <= V_y <= 1.0
+-1.0 \leq V_y \leq 1.0
 \hspace{5mm},\hspace{5mm}
--1.0 <= V_\omega <= 1.0
+-1.0 \leq V_\omega \leq 1.0
 \label{eq:velocities_range}
 \end{equation}
 
-Valores normalizados entre $-1.0$ e $1.0$ são utilizados para indicar as velocidades. Significando $0.0$ como o valor de velocidade nula, ou sem movimento, $1.0$ o valor de velocidade máxima e $-1.0$ o valor de velocidade máxima no sentido oposto. Valores normalizados foram adotados para abstrair valores de velocidades absolutos já que futuras aplicações deste trabalho podem utilizar diferentes configurações de robôs. Desta forma, o controlador de comportamento pode abstrair a configuração do robô que está rodando-o e enviar velocidades relativas. Adicionalmente, valores normalizados provém a integração perfeita entre as funções trigonométricas para a definição das trajetórias senoidais adotadas por \textit{Kamiri et al}.
-
-Com os valores de velocidades definidos, é preciso \todo{terminar este parágrafo.}.
-
-A cada iteração novas dois vetores $T$, de transferência, e $R$, de rotação, de cada pé são obtidas. Os elementos dos vetores $T$ e $R$ são detalhados na seção~\ref{sec:trajectories}. Em poder desses vetores, utiliza-se os conceitos da cinemática inversa para gerar os ângulos de cada junta. Finalmente, os ângulos gerados são enviados aos motores -- como especificado na subseção~\ref{subsec:motors_abstraction} -- e o a iteração é finalizada.
+A cada iteração dois vetores $T$, de transferência, e $R$, de rotação, de cada pé são obtidos. Para o pé direito, utiliza-se o $t$ corrente no relógio central, já à perna esquerda um atraso de fase de $\pi/2$ é inserido. Os elementos dos vetores $T$ e $R$ são detalhados na seção~\ref{sec:trajectories}.
 
 \begin{equation}
 \label{eq:trajectory_and_rotation_definition}
 T = [Foot_x,\hspace{3mm}Foot_y,\hspace{3mm}Foot_z],\hspace{5mm}R = [Foot_{roll},\hspace{3mm}Foot_{pitch},\hspace{3mm}Foot_{yaw}]
 \end{equation}
+
+Em poder desses vetores, utiliza-se os conceitos da cinemática inversa para gerar os ângulos de cada junta. Finalmente, os ângulos gerados são enviados aos motores -- como especificado na subseção~\ref{subsec:motors_abstraction} -- e o a iteração é finalizada.
 
 \section{Orientação}
 
