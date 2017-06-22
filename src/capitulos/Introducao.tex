@@ -44,6 +44,28 @@ Dadas, os problemas encontrados no funcionamento do sistema atual, e as consider
 
 \todo{Conversar com o orientador sobre a lista de objetivos.}\todo{Melhorar a descrição dos objetivos.}Desta forma, este trabalho tem como objetivo a implementação de uma versão funcional do \textit{walking gait}, melhorando o código atual - de forma a diminuir a curva de aprendizado, assim estimulando novas extensões e otimizações - com uma nova arquitetura orientada a objetos, ativando o sistema com suporte ao \todo{Introduzir o ROS}ROS, adicionando uma interface web responsiva de configuração.
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{draft}
+A caminhada de robôs com pernas vem sendo desenvolvida desde da década de 70, quando Kato e Vukobratovic praticamente iniciaram este campo de estudo \cite{kajita2008}.
+
+\begin{draft}
+	\todo{Reescrever esta desgraça}
+	\todo{Introduzir os conceitos de equilíbrio estático e dinâmico.}No desenvolvimento de qualquer \textit{walking gait}, é necessário a estratégia de equilíbrio entre estática ou dinâmica. Cada estratégia tem suas vantagens e desvantagens. Todavia, o equilíbrio dinâmico vem sendo mais aceito dentre os pesquisadores.
+\end{draft}
+
+O equilíbrio estático mantém o centro de massa, ou \abrv[CoM -- Centro de massa, do inglês \textit{Center of Mass}]{CoM -- do inglês \textit{Center of Mass} --} sempre sob a superfície de apoio do robô. Uma enorme desvantagem é que as velocidades alcançadas são bem lentas, tendo em vista que o movimento produzido para a caminhada não deve gerar inercia suficiente para deslocar o CoM fora da área esperada. Geralmente observa-se pés maiores em robôs que adotam este tipo de caminhada \cite{miller1994}.
+
+Ainda segundo Miller, o equilíbrio dinâmico, considera a dinâmica do movimento da caminhada, as inércias das partes que movem-se. Com isto, ela habilita o CoM movimentar-se para fora do ponto de apoio, mantendo o robô em uma espécie de ``queda controlada''. Assim, ela habilita maiores velocidades de caminhada com maior eficiência.
+
+\todo{Ligar parágrafos}
+
+Durante qualquer tarefa envolvendo locomoção é necessária uma maneira de controlar o \textit{walking gait} de forma a direcionar o robô ao destino escolhido. Uma das formas utilizadas são movimentos pré-definidos que executam ações específicas. Assim, essas ações são sequenciadas de forma a levar o robô até seu destino. Por exemplo, dar um passo a frente, um passo lateral à esquerda, girar 30\degree à direita. A desvantagem deste método é que cada ação deve ser executada em sequência, o que pode levar a menos agilidade.
+
+Uma segunda forma de controle é a chamada caminhada omnidirecional que consiste em controlar o robô por velocidades em diferentes eixos. Essas mudanças podem ser realizadas com o robô em movimento, sem a necessidade de encadeamento de ações. Adicionalmente, existe a possibilidade de combinar movimentos em diferentes eixos ao mesmo tempo criando novas possibilidades de locomoção e aumentando a agilidade do robô.
+\end{draft}
+
 %\section{Objetivos}
 %
 %Nesta seção são definidos os objetivos gerais e específicos do trabalho.
@@ -73,3 +95,6 @@ desenvolvimento e implementação do trabalho que está sendo proposto.
 
 Nesta seção deve ser apresentado como está organizado o trabalho, sendo
 descrito, portanto, do que trata cada capítulo.
+
+
+
