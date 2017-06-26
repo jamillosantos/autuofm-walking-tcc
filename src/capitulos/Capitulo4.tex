@@ -120,6 +120,7 @@ Ao realizar a nova implementação do \textit{walking gait}, uma mudança comple
 \todo{Verificar a localidade deste parágrafo. Ele foi escrito mas parece estar fora do lugar além de duplicar informações.}Para realizar a tarefa de forma adequada, o componente faz uso de multi-processamento. Três \textit{threads} dentro do componente são responsáveis por tarefas específicas essenciais ao complemento do comportamento geral da caminhada: A \textit{thread} de rede, a \textit{thread} atualização dos motores e a \textit{thread} principal.
 
 \subsection{Servidor de controle}
+\label{subsec:architecture:walkinggait:controlserver}
 
 O servidor de controle é um submódulo que é implementa a interface de comunicação do \textit{walking gait} a outros componentes do sistema. De fato, todo o gerenciamento da caminhada pode ser realizada a partir de um único comando que atualizam as velocidades $V_x$, $V_y$ e $V_\theta$.
 
@@ -176,23 +177,88 @@ O processo de caminhada inicia-se no momento em que qualquer velocidade é difer
 \subsection{Atualizador de juntas}
 \label{subsec:architecture:walkinggait:jointsupdater}
 
-\begin{center}
-	\color{red}
-	\center	
-	\LARGE Incompleto, em desenvolvimento.
-\end{center}
-
-Este módulo é responsável pela atualização dos ângulos dos motores. Ele roda em sua própria \textit{thread}, afim de não bloquear o processamento do \textit{walking gait}.
+\todo{Citar a thread.}Este módulo é responsável pela atualização dos ângulos dos motores. Ele roda em sua própria \textit{thread}, afim de não bloquear o processamento do \textit{walking gait}.
 
 A implementação padrão do atualizador de juntas, usa uma abstração de motores afim de prover o uso de motores de diferentes fabricantes em futuras aplicações.
 
-Como classe base, temos a classe $Actuator$ que define a propriedade básica de todos os atuadores.
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=0.6]{imagens/svg/softwarearchitecture-actuators-hierarchy}
+	\caption{Fragmento do diagrama de classe da hierarquia dos atuadores.}
+	\label{fig:architecture:actuator:classdiagram}
+\end{figure}
+
+A classe abstrata $Actuator$, base da implementação dos atuadores, define a propriedade de posição, referida na classe como $angle$, comum a todos os atuadores. Cada tipo de atuador, pode ter diferentes características e parâmetros de acordo com seu fabricante, embora todos tenham o mesmo objetivo.
+
+Construída sobre a classe $Actuator$ está a classe $Dynamixel2Actuator$. Ela adiciona as propriedades $id$ e $speed$. O $id$ é a identificação numérica de cada junta, solução adotada pela Robotis para identificar cada servo dentro da rede TTL. Já a $speed$ é a velocidade que a posição é alcançada. Todos os atuadores utilizados em Arash funcionam de forma parecida, apesar das diferentes versões. Assim, todos os atuadores do sistema são representados por instâncias desta classe.
+
+A figura~\ref{fig:architecture:actuator:classdiagram} mostra o diagrama de classe com a hierarquia e os principais métodos e propriedades das classes $Actuator$ e $Dynamixel2Actuator$.
+
+A classe $ActuatorUpdater$ implementa uma iteração completa do processo de atualização das juntas e a figura~\ref{fig:architecture:actuatorupdater:sequence} mostra este processo. Para mante-lo rodando continuamente, uma \textit{thread} mantém o método $update$ sendo chamando continuamente. A frequência de atualização é sincronizada com a geração dos dados pelo módulo do motor de caminhada.
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[scale=0.5]{imagens/svg/softwarearchitecture-actuators-hierarchy}
-	\caption{Fragmento do diagrama de classe da hierarquia dos atuadores.}
-	\label{fig:architecture:walkinggait:walkengine:sequence}
+	\includegraphics[scale=0.6]{imagens/svg/softwarearchitecture-actuatorupdater-classdiagram}
+	\caption{Fragmento do diagrama de classe da hierarquia dos atualizadores de atuadores.}
+	\label{fig:architecture:actuatorupdater:classdiagram}
 \end{figure}
 
-Para a atualização dos dados, Para tanto, ele precisa comunicar-se com os o componente \textit{Proxy} via USB. Assim, uma conexão é aberta com o dispositivo.
+Na figura~\ref{fig:architecture:actuatorupdater:classdiagram} é possível observar as principais classes envolvendo o processo de atualização. A classe $ActuatorUpdater$ é responsável por enviar os dados calculados pelo motor de caminhada aos atuadores. Porém, ela é uma classe abstrata e serve apenas como implementação básica para as reais implementações. A classe concreta $DynamixelUpdater$, filha de $ActuatorUpdater$, define o método $flush$ implementando os comandos \textit{Dynamixel 2.0} \cite{dynamixel} para os motores reais. A classe concreta $SimulationUpdater$, também filha de $ActuatorUpdater$, implementa a comunicação para um sistema de visualização, descrito nas próximas seções, que habilita a visualização dos movimentos do robô usando um ambiente 3D facilitando a visualização dos movimentos.
+
+Pensando em futuras implementações, criou-se a classe abstrata $ActuatorAngleTransfer$ que é responsável por conhecer a estrutura do robô e quais atuadores são as equivalentes as juntas. Assim, quando seu método $update$ é chamado, este transfere todos os ângulos das juntas, situados em sua propriedade $source$, às suas respectivas instâncias de $Actuator$ correspondentes. A propriedade $source$ é uma instância da classe $Humanoid$ que é atualizada pelo motor de caminhada ao final do processamento da sua iteração.
+
+Acompanhando o diagrama de sequência da figura~\ref{fig:architecture:actuatorupdater:sequence}, podemos ver o método $update$ de $ActuatorUpdater$ sendo chamado. Na sequência, o método $update$ de \textit{humanoidAngleTransfer} é chamado passando a própria instância de $ActuatorUpdater$, onde todos os dados das juntas são transferidos de $source$ (propriedade de \textit{humanoidAngleTransfer}) para os atuadores contidos na propriedade $actuators$ de $updater$. Assim, finalmente, sendo chamado o método $flush$ de $ActuatorUpdater$ que implementa a verdadeira comunicação com o motor.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=0.45]{imagens/svg/softwarearchitecture-actuatorudpater-sequence}
+	\caption{Fragmento do diagrama de classe da hierarquia dos atuadores.}
+	\label{fig:architecture:actuatorupdater:sequence}
+\end{figure}
+
+Retornando à figura~\ref{fig:architecture:actuatorupdater:classdiagram} observa-se duas implementações de $ActuatorUpdater$. A primeira implementação, a classe $Dynamixel2Updater$, implementa o protocolo \textit{Dynamixel 2.0} e faz a comunicação via USB com o componente \textit{Proxy}. Após os dados serem enviados ao \textit{Proxy}, este encaminhará os dados aos motores que executam o comando posicionando as juntas.
+
+A segunda implementação, a classe $SimulationUpdater$, envia as informações do atuador ao visualizador 3D. Ao envio é realizado através da serialização das informações em um objeto JSON e transmitido via UDP, de forma similar ao servidor de controle implementado no \textit{walking gait}.
+
+A figura~\ref{fig:architecture:walkinggait:visualization:json} mostra um pacote de atualização de exemplo com as propriedades das juntas e seus ângulos. Nota-se a propriedade \textit{params} com um objeto JSON com suas chaves definindo os nomes das juntas recebendo outros objetos com a propriedade \textit{angle} com o valor dos ângulos em radianos.
+
+\begin{figure}[htb]
+	\begin{lstlisting}[language=json,firstnumber=1]
+{
+  "command": "update",
+  "params":
+  {
+    "RightHipLateral": { "angle": 0.1 },
+    "RightHipTransversal": { "angle": 0.2 },
+    "RightHipFrontal": { "angle": 0.3 },
+    "RightKneeLateral": { "angle": 0.4 },
+	...,
+    "LeftFeetLateral": { "angle": 0.5 },
+    "LeftFeetFrontal": { "angle": 0.6 }
+  }
+}
+\end{lstlisting}
+	\caption{Comando de controle recebido pelo visualizador 3D.}
+	\label{fig:architecture:walkinggait:visualization:json}
+\end{figure}
+
+\subsection{Visualizador 3D}
+
+As trajetórias geradas, juntamente com os 20 ângulos radianos das juntas, gerados pelo \textit{walking gait} são difíceis de visualizar e validar. Desta forma torna-se necessária uma forma de visualizar, mesmo que de forma preliminar, o resultado; já que o acesso ao robô de forma física é impossível.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=0.55]{imagens/visualizador3d}
+	\caption{Captura de tela da imagem gerada pelo visualizador 3D.}
+	\label{fig:architecture:visualization:printscreen}
+\end{figure}
+
+A melhor solução seria a utilização de um \textit{framework} de simulação, como Gazebo \cite{gazebo}. Onde seria possível validar toda o processo de caminhada. Todavia, por restrição de tempo impossibilitaram a adotação desta solução. 
+
+Desta forma, o visualizador 3D é uma ferramenta de apoio ao desenvolvimento criada com o objetivo de habilitar a interpretação visual dos ângulos e trajetórias gerados pelo \textit{walking gait}.
+
+Desenvolvido utilizando \textit{framework} Unity 3D 5.1, comumente utilizado para desenvolvimento de jogos, o visualizador 3D possui a estrutura de Arash em uma cadeia de atuadores anexadas para simular as rotações geradas pelo \textit{walking gait}. Entretando, sem efeitos físicos habilitados.
+
+A comunicação entre o visualizador 3D e o \textit{walking gait} é realizada pela troca de \textit{JSON} via UDP, de forma similar ao servidor de controle (subseção~\ref{subsec:architecture:walkinggait:controlserver}). Cada pacote contém o estado completo de todas as juntas de Arash.
+
+Ao receber os dados, o visualizador procura o atuador virtual correspondente e aplica a transformação na cadeia anexada a ele. A sequência de processo no tempo causa o efeito de animação.
