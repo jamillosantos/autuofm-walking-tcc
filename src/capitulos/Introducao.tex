@@ -32,7 +32,7 @@ Inicialmente, sendo um sistema complexo, a caminhada deve ser configurada para c
 
 O primeiro problema com a implementação atual é que a configuração se dá através de alterações diretas dos valores dos parâmetros no código-fonte, em seguida compila-se, envia-se a nova versão à \textit{OpenCM9}. Em seguida, inicializa-se o robô e verifica-se a caminhada. Além de massante, este esquema de atualização não favorece uma forma sadia de manter as alterações dos parâmetros organizada. Há uma frequente perda de quais valores de parâmetros são melhores para qual tipo de situação. Uma solução seria criar subversões do sistema para cada cenário, o que desfavorece a correção de \textit{BUGs} e melhorias, já que cada modificação deve ser refletida em várias versões. Uma segunda possibilidade seria criar uma interface de comunicação entre um computador, que funcionaria como um gerenciador, e o \todo{Introduzir a expressão \textbf{\textit{walking gait}}.} \textit{walking gait} via USB. Assim, o computador poderia guardar arquivos de configurações que seriam enviados à placa microcontroladora a medida que fossem necessários, o que seria uma saída simples e eficaz, mas não definitiva, tendo em vista outros problema citados abaixo.
 
-O segundo problema com o \textit{walking gait} atual é a dificuldade de implementação de simulações, testes e depuração. A única forma de obter visualização da saída gerada é através do \textit{console serial} da IDE de programação, o que torna o processo de depuração um exercício de abstração com visualização de ângulos em 3 dimensões, ou arriscar-se aplicando a saída direto aos motores, de alto custo. Em relação a simulação, ela seria até possível, porém seria necessária mais um dispositivo \textit{OpenCM9.04} e algumas modificações no código original para que ele possa ser acoplado à algum framework de simulação de robôs.
+O segundo problema com o \textit{walking gait} atual é a dificuldade de implementação de simulações, testes e depuração. A única forma de obter visualização da saída gerada é através do \textit{console serial} da IDE de programação, o que torna o processo de depuração um exercício de abstração com visualização de ângulos em 3 dimensões, ou arriscar-se aplicando a saída direto aos motores, de alto custo. Em relação a simulação, ela seria até possível, porém seria necessária mais um dispositivo \textit{OpenCM9.04} e algumas modificações no código original para que ele possa ser acoplado a algum framework de simulação de robôs.
 
 O terceiro problema é a forma em que o paradigma estruturado foi utilizada no sistema. A complexidade do sistema implica para uma baixa curva de assimilação do funcionamento em um paradigma orientado a objetos ajudaria consideravelmente na compreensão dos mecanismos dentro do \textit{walking gait}, quais os seus papéis e como eles se comunicam.
 
@@ -40,61 +40,14 @@ O quarto problema é a natureza multi-processada do sistema. "Ao mesmo tempo" em
 
 Por fim, o quinto problema, que também limita o desenvolvimento da próxima geração, é o tamanho da memória ROM, que guarda o \textit{walking gait}, da placa microcontroladora. Atualmente, o \textit{firmware} da \textit{OpenCM9.04} já foi modificado, via remoção de funções não utilizadas, para diminuir seu tamanho e  assim liberar espaço para a versão do sistema.
 
-Dadas, os problemas encontrados no funcionamento do sistema atual, e as considerações listadas até agora, este trabalho propõe mover a execução do componente \textit{walking gait} do microcontrolador \textit{OpenCM09.04} para o computador. Para o projeto da solução, foi lavada em consideração dois aspectos importantes: o desempenho e a interface de comunicação com os motores, decidindo-se assim pela adoção da linguagem \textit{C++} versão 14. Um fator bastante importante foram os recursos da linguagem que vão prover uma arquitetura bem simples e eficiente.
+Dadas, os problemas encontrados no funcionamento do sistema atual, e as considerações listadas até agora, este trabalho propõe mover a execução do componente \textit{walking gait} do microcontrolador \textit{OpenCM09.04} para o computador. Para o projeto da solução, foi levada em consideração dois aspectos importantes: o desempenho e a interface de comunicação com os motores, decidindo-se assim pela adoção da linguagem \textit{C++} versão 14. Um fator bastante importante foram os recursos da linguagem que vão prover uma arquitetura bem simples e eficiente.
 
-\todo{Conversar com o orientador sobre a lista de objetivos.}\todo{Melhorar a descrição dos objetivos.}Desta forma, este trabalho tem como objetivo a implementação de uma versão funcional do \textit{walking gait}, melhorando o código atual - de forma a diminuir a curva de aprendizado, assim estimulando novas extensões e otimizações - com uma nova arquitetura orientada a objetos, ativando o sistema com suporte ao \todo{Introduzir o ROS}ROS, adicionando uma interface web responsiva de configuração.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{draft}
-A caminhada de robôs com pernas vem sendo desenvolvida desde da década de 70, quando Kato e Vukobratovic praticamente iniciaram este campo de estudo \cite{kajita2008}.
-
-\begin{draft}
-	\todo{Reescrever esta desgraça}
-	\todo{Introduzir os conceitos de equilíbrio estático e dinâmico.}No desenvolvimento de qualquer \textit{walking gait}, é necessário a estratégia de equilíbrio entre estática ou dinâmica. Cada estratégia tem suas vantagens e desvantagens. Todavia, o equilíbrio dinâmico vem sendo mais aceito dentre os pesquisadores.
-\end{draft}
-
-O equilíbrio estático mantém o centro de massa, ou \abrv[CoM -- Centro de massa, do inglês \textit{Center of Mass}]{CoM -- do inglês \textit{Center of Mass} --} sempre sob a superfície de apoio do robô. Uma enorme desvantagem é que as velocidades alcançadas são bem lentas, tendo em vista que o movimento produzido para a caminhada não deve gerar inercia suficiente para deslocar o CoM fora da área esperada. Geralmente observa-se pés maiores em robôs que adotam este tipo de caminhada \cite{miller1994}.
-
-Ainda segundo Miller, o equilíbrio dinâmico, considera a dinâmica do movimento da caminhada, as inércias das partes que movem-se. Com isto, ela habilita o CoM movimentar-se para fora do ponto de apoio, mantendo o robô em uma espécie de ``queda controlada''. Assim, ela habilita maiores velocidades de caminhada com maior eficiência.
-
-\todo{Ligar parágrafos}
-
-Durante qualquer tarefa envolvendo locomoção é necessária uma maneira de controlar o \textit{walking gait} de forma a direcionar o robô ao destino escolhido. Uma das formas utilizadas são movimentos pré-definidos que executam ações específicas. Assim, essas ações são sequenciadas de forma a levar o robô até seu destino. Por exemplo, dar um passo a frente, um passo lateral à esquerda, girar 30\degree à direita. A desvantagem deste método é que cada ação deve ser executada em sequência, o que pode levar a menos agilidade.
-
-Uma segunda forma de controle é a chamada caminhada omnidirecional que consiste em controlar o robô por velocidades em diferentes eixos. Essas mudanças podem ser realizadas com o robô em movimento, sem a necessidade de encadeamento de ações. Adicionalmente, existe a possibilidade de combinar movimentos em diferentes eixos ao mesmo tempo criando novas possibilidades de locomoção e aumentando a agilidade do robô.
-\end{draft}
-
-%\section{Objetivos}
-%
-%Nesta seção são definidos os objetivos gerais e específicos do trabalho.
-%
-%\subsection{Objetivos Gerais}
-%
-%\begin{itemize}
-%	\item Criar componente \textit{walking gait}, controlado em runtime via JSON over UDP, com ferramenta de configuração simplificada.
-%\end{itemize}
-%
-%\subsection{Objetivos Específicos} 
-%
-%\begin{itemize}
-%	\item Melhorar o código atual (legibilidade e arquitetura);
-%	\item Diminuir a curva de aprendizado, tornando o código extensível;
-%	\item Integrar componente com o ROS (Robot Operating System) e Gazebo (simulação);
-%	\item Diminuindo o tempo, necessidade de conhecimento sobre o código para efetuar a configuração.
-%\end{itemize}
-
-\section{Metodologia}
-
-Na metodologia é descrito o método de investigação e pesquisa para o
-desenvolvimento e implementação do trabalho que está sendo proposto.
+\todo{Conversar com o orientador sobre a lista de objetivos.}\todo{Melhorar a descrição dos objetivos.}Desta forma, este trabalho tem como objetivo a implementação de uma versão funcional do \textit{walking gait}, melhorando o código atual - de forma a diminuir a curva de aprendizado, assim estimulando novas extensões e otimizações - com uma nova arquitetura orientada a objetos.
 
 \todo{Conversar com o orientador sobre isto.}
 \section{Organização do trabalho}
 
-Nesta seção deve ser apresentado como está organizado o trabalho, sendo
-descrito, portanto, do que trata cada capítulo.
-
+\todo{Após conclusão escrever esta parte.}
+Descrever os capítulos e seções.
 
 

@@ -1,154 +1,198 @@
 % Capítulo 4
-\chapter{A matemática dos movimentos}
-\label{ch:Math}
+\chapter{Arquitetura}
+\label{ch:architecture}
 
-Para caminhar, Arash move suas juntas de uma forma sincronizada mantendo o equilíbrio. É um processo contínuo onde cada passo é planejado e possíveis perturbações são compensadas, o mais breve possível, afim de preservar a trajetória e evitar quedas. O processo de caminhada é dividido em ciclos. Cada ciclo é dado pelo movimentos de passo da perna direita seguido pelo movimento da perna esquerda. O caminho percorrido pelos pés, suas posição e rotação, é predeterminado pelo \textit{walking gait} e é referido como trajetória. 
+Inicialmente, a arquitetura adotada pelo time AUT-UofM é uma arquitetura distribuída, baseada no \textit{framework} \abrv[ROS -- \textit{Robot Operating System}]{ROS}. Como a robótica tenta solucionar problemas em diversas áreas da computação. Desde o controle de motores, usando programação de baixo nível, até soluções sofisticas utilizando \abrv[IA -- Inteligência artificial]{IA (Inteligência artificial)} aplicada a visão e tomada de decisões, entre outros.
 
-A cada momento no tempo do ciclo -- levando em consideração também outras variáveis -- a trajetória fornece a posição e rotação de ambos os pés de Arash. A frequência de cada ciclo é definida por um relógio central definido no intervalo exibido na equação~\ref{eq:math:centraclock}, sendo $t$ o tempo do ciclo atual da caminhada.
+Assim, o desenvolvimento de uma única ferramenta, em uma única linguagem, que solucione todos os problemas pode tornar-se inviável, já que linguagens diferentes são projetadas com intenções diferentes e problemas diferentes em mente.
 
-\begin{equation}
-	\label{eq:math:centraclock}
-	0 \leq t < \pi
-\end{equation}
+Desta forma, este capítulo divide cada subsistema dentro do robô como componentes apresentando suas funções antes e após implementadas as mudanças propostas pelo trabalho em suas diferentes camadas de execução. Alguns deles são mais detalhados e descritos em seus módulos, apresentando alguns fluxogramas e diagramas afim de expressar melhor seu funcionamento.
 
-No conceito de caminhada omnidirecional são utilizadas 3 velocidades afim de controlar a direção e velocidade do robô. $V_x$ é a velocidade em direção à frente, com valores positivos para a frente e negativos para caminhar de costas. $V_y$ é a velocidade lateral com onde passos para o lado são definidos com valores positivos implicando em movimentos laterais à direita. $V_\omega$ é a velocidade de rotação por passo com valores positivos indicando rotação também à direita.
+\section{Componentes e arquitetura atual}
+\label{sec:architecture:current_components_and_architecture}
 
-Na figura~\ref{fig:math:velocities} é possível observar o diagrama com as posições dos pés e torso de Arash. Em azul estão ambos os pés e torso de Arash no início do ciclo de caminhada, quando $t$ é $0$. Em cinza, vê-se o pé direito e sua posição projetada quando $t$ vale $\pi$ (ou seja, metade do ciclo). Nota-se o deslocamento frontal em $V_x$, um deslocamento lateral em $V_y$ e um deslocamento angular em $V_\omega$ do torso, bem como do pé direito (afetado pela primeira metade do ciclo).
+A arquitetura do sistema pode ser abstraída em $3$ camadas: A camada de \textit{hardware}, a de software de baixo nível, e a de software.
 
-\begin{figure}[htb]
-	\centering
-	\includegraphics[scale=1]{imagens/svg/velocities-diagram}
-	\caption{Diagrama da direção das velocidades da caminhada omnidirecional}
-	\label{fig:math:velocities}
-\end{figure}
+Na camada de \textit{hardware}, a mais inferior na figura~\ref{fig:softwarearchitecture:overview}, estão contidos os componentes físicos do sistema. Uma câmera \textit{Webcam Logintech C920 Pro HD 15MP Full HD1080p} é usada para fornecer imagens para o sistema de visão. Uma \abrv[IMU -- do inglês \textit{Inertia Measurement Unit}]{IMU}, do inglês \textit{Inertia Measurement Unit}, é usada para fornecer informações para o posterior cálculo da orientação do corpo do robô em relação ao eixo de gravidade. E os motores, também chamados de atuadores, são utilizados nas juntas para os movimentos às partes do robô.
 
-Como mostra as equações~\ref{eq:math:velocities:intervals}, valores normalizados entre $-1.0$ e $1.0$ são utilizados para indicar as velocidades. Adotando-se $0.0$ como velocidade nula, ou sem movimento, $1.0$ como valor de velocidade máxima e $-1.0$ como valor de velocidade máxima no sentido oposto. Valores normalizados foram adotados para abstrair valores de velocidades absolutos já que futuras aplicações deste trabalho podem utilizar diferentes configurações de robôs. Desta forma, o controlador de comportamento pode abstrair a configuração do robô que está sendo controlado e enviando velocidades relativas. Adicionalmente, valores normalizados provém a integração perfeita entre as funções trigonométricas para a definição das trajetórias senoidais adotadas por \textit{Kamiri et al}.
+A camada de software de baixo nível é responsável pelo processamento de dados da \textit{IMU}, juntamente com a execução do \textit{walking gait}. Esta camada roda dentro da placa microcontroladora \textit{Robotis.Co OpenCM9.04}, ou simplesmente \textit{OpenCM9.04}.
 
-\begin{equation}
-\label{eq:math:velocities:intervals}
--1.0 \leq V_x \leq 1.0
-\hspace{5mm},\hspace{5mm}
--1.0 \leq V_y \leq 1.0
-\hspace{5mm},\hspace{5mm}
--1.0 \leq V_\omega \leq 1.0
-\end{equation}
+A placa controladora conta com um processador \textit{32bit ARM Cortex-M3}, memória \textit{flash} (que mantém os dados mesmo quando desligada) de 128Kb e 20Kb de \textit{SRAM} \cite{opencm904}. A placa tem seu projeto e código fonte abertos e foi utiliza a \textit{Arduino IDE} como \abrv[IDE -- do inglês \textit{integrated development environment}] de desenvolvimento. Ela conecta-se ao controlador principal via USB, por onde há a comunicação. Adicionalmente, devido ser produzida pela mesma empresa, a placa integra-se perfeitamente com os motores utilizados no projeto de Arash.
 
-A cada iteração dois vetores $T$, de transferência, e $R$, de rotação, de cada pé são obtidos. Para o pé direito, utiliza-se o $t$ corrente no relógio central, já à perna esquerda um atraso de fase de $\pi/2$ é inserido.
+Os motores de Arash, todos pertencentes a categoria \textit{Dynamixel}, são atuadores inteligentes otimizados para robôs. Eles possuem controle \abrv[PID -- do inglês \textit{Porportional Integral Derivative}]{PID} integrado e comunicar-se em uma rede de comunicação \abrv[TTL -- Do inglês \textit{transistor-transistor logic}]{TTL (\textit{transistor-transistor logic})}{} com \textit{baudrate} de até $4.5$ Mbps \cite{dynamixel}.
 
-A equação~\ref{eq:math:T_and_R:definition} mostra a definição de dos vetores $T$ e $R$. Cada um de seus elementos representam um eixo dentro deles e são gerados pelas trajetórias que são detalhadas na seção~\ref{sec:math:trajectories}.
-
-\begin{equation}
-\label{eq:math:T_and_R:definition}
-T = [Foot_x,\hspace{3mm}Foot_y,\hspace{3mm}Foot_z],\hspace{5mm}R = [Foot_{roll},\hspace{3mm}Foot_{pitch},\hspace{3mm}Foot_{yaw}]
-\end{equation}
-
-Em poder desses vetores, utiliza-se os conceitos da cinemática inversa para gerar os ângulos de cada junta. Finalmente, os ângulos gerados são enviados aos motores -- como especificado na subseção~\ref{subsec:motors_abstraction} -- e, por fim, a iteração é finalizada.
-
-\section{Orientação}
-\label{sec:math:orientation}
-
-Durante a implementação deste trabalho, nenhuma modificação foi realizada no componente de orientação originalmente desenvolvido por Kamiri \textit{et al}. Entretanto, para a implementação do cálculo da trajetórias é necessário algumas informações sobre a saída deste componente.
-
-No final do processamento, obtém-se como saída um vetor com de aceleração linear nos eixos $x$ e $y$, como mostra a equação~\ref{eq:orientation:accel:definition}. Então, o vetor $Accel$ é utilizado para o cálculo da detecção de ``empurrões'', ou distúrbios, como visto nas equações \ref{eq:orientation:push:x} e \ref{eq:orientation:push:y}, que representação a variação na aceleração linear entre a iteração atual e a anterior.
-
-\begin{align}
-	Accel &= [Accel_x \hspace{5mm} Accel_y] \label{eq:orientation:accel:definition}
-\end{align}
-
-\begin{align}
-	Push_x &= Accel[x]_t - Accel[x]_{t-1} 	 \label{eq:orientation:push:x}   \\
-	Push_y &= Accel[y]_t - Accel[y]_{t-1}     \label{eq:orientation:push:y}
-\end{align}
-
-\section{Geração da trajetória}
-\label{sec:math:trajectories}
-
-Como afirmado anteriormente, a trajetória define a posição e rotação de ambos os pés de Arash durante cada momento do ciclo de caminhada, gerando como saída dois vetores $T$ e $R$, como definido na equação~\ref{eq:math:T_and_R:definition}. Kamiri \textit{et al} definem as funções que determinam cada eixo dos vetores, da equação \ref{eq:math:trajectories:foot:x} até \ref{eq:math:trajectories:foot:yaw}.
-
-\begin{align}
-      Foot_x &= \bigg(\dfrac{-cos(t) + 1}{2}\bigg) \times \bigg(\dfrac{tanh(V_x + Push_x) + H_{leg}}{\pi}\bigg)                    \label{eq:math:trajectories:foot:x}  \\
-      Foot_y &= \big((-sin(t) \times B_{swing}) + (cos(t) + 1)\big) \times \bigg(\dfrac{tanh(V_y + Push_y) + H_{leg}}{2\pi}\bigg) \\
-      Foot_z &= \bigg(\dfrac{sin(t)}{t + 1/2}\bigg) \times \bigg(\dfrac{tanh(V_x + V_y) \times H_{leg}}{\pi}\bigg) \\
- Foot_{roll} &= 0 \\
-Foot_{pitch} &= 0 \\
-  Foot_{yaw} &= \bigg(\dfrac{sin(V_\omega) + 1}{2}\bigg) \times \bigg(\dfrac{-cos(t) + 1}{2} \times V_\omega\bigg)     \label{eq:math:trajectories:foot:yaw}
-\end{align}
-
-Onde $t$ representa o tempo atual normalizado em cada ciclo; $B_{swing}$ representa a quantidade de compensação de balanço lateral que o corpo deve efetuar para compensar a dinâmica do movimento das pernas; $Push$ -- definido na seção~\ref{sec:math:orientation} -- é a quantidade de distúrbio causado por desvios na trajetória; por fim, $H_{leg}$ é o valor do tamanho da perna, extraído da estrutura do robô.
-
-Nota-se que as funções $Foot_{roll}$ e $Foot_{pitch}$ são definidas como $0$ pois, em resultados experimentais, os efeitos durante a caminhada mostraram-se desprezíveis \cite{karimionline}.
-
-\section{Cinemática Inversa}
-
-Descobrir a posição de um parte do robô a partir dos ângulos de suas juntas, \textit{forward kinematics}, é uma tarefa fácil e pode ser realizada eficientemente. Porém, o oposto -- dado um ponto e calcular os ângulos das juntas que o alcancem; processo conhecido como \abrv[IK -- conhecido como \textit{Inverse Kinematics}, ou cinemática inversa]{IK (do inglês \textit{inverse kinematics} ou cinemática inversa)}-- não é uma tarefa tão simples.
-
-Enquanto a problemas envolvendo a \textit{forward kinematics} possuem uma solução única, na \textit{IK} podem haver múltiplas soluções ou nenhuma \cite{spong2005robot}. Pode-se observar este fato ao tocar a ponta do próprio nariz, já que existem diversas combinações de posições do ombro, cotovelo, pulso e falanges que resolvem este problema; Entretando, usando as configurações de braço de um Tiranossauro o problema não teria solução, uma vez que o braço é demasiado curto para efetuar tal tarefa.
-
-Aplicando a teoria da cinemática inversa ao problema proposto, Kamiri \textit{et al} apresenta uma solução direta aproveitando-se das limitações impostas pela configuração das juntas de Arash.
-
-\begin{equation}
-	\label{eq:math:ik:P:definition}
-	P = [Hip_{yaw}, Hip_{roll}, Hip_{pitch}, Knee, Foot_{pitch}, Foot_{roll}] = iK(T, R)
-\end{equation}
-
-Na equação~\ref{eq:math:ik:P:definition}, vemos a definição do vetor P que mantém os valores dos ângulos de todas as juntas. Ele é a saída da função $iK$ que recebe como parâmetros os vetores $T$ e $R$ já definidos na equação~\ref{eq:math:T_and_R:definition}.
-
-O processo de formulação das equações inicia-se a partir do nó principal do quadril descendo para o fim da cadeia, nos pés; onde encontra-se o fim da cadéia e o ponto de destino.
-
-Na primeira etapa, a figura~\ref{fig:ik:upperview} mostra uma tomada de cima de Arash auxiliando na visualização da equação \ref{eq:ik:upper:hip:yaw}. Nota-se que, embora os pés de Arash não possuam rotação no eixo $yaw$ (figura~\ref{fig:architecture:arash:actuators_orientations}) a rotação $yaw$ aplicada no quadril, afeta toda a cadeia.
+A camada de software é executada dentro de um computador, doravante referido como controlador principal, \textit{mini-box PC MAXData QutePC-3001} com um processador 64 bits de dois núcleos Intel\copyright{} Celeron\copyright{} 847E (1,1GHz e 2MB de \textit{cache}), rodando o sistema operacional Linux Ubuntu versão 14.04. Esta camada é responsável por rodar os componentes de software de alto nível e enviar comandos de controle para a camada inferior de baixo nível.
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[scale=1.5]{imagens/svg/inverse-kinematics-upperview}
-	\caption{Diagrama da visão superior da estrutura de Arash que representa da equação~\ref{eq:ik:upper:hip:yaw} até~\ref{eq:ik:upper:z:2}}
-	\caption*{\cite{karimionline}}
-	\label{fig:ik:upperview}
+	\includegraphics[scale=1]{imagens/svg/softwarearchitecture-flow}
+	\caption{Visão simplificada da arquitetura do sistema e seus fluxos.}
+	\label{fig:softwarearchitecture:overview}
 \end{figure}
 
-\begin{align}
-	P[Hip_{yaw}] &= R_{yaw}                             \label{eq:ik:upper:hip:yaw}  \\
-	         X_2 &= T_x cos(R_{yaw}) + T_y sin(R_{yaw})  \label{eq:ik:upper:x:2}      \\
-	         Y_2 &= -T_x sin(R_{yaw}) + T_ycos(R_{yaw})   \label{eq:ik:upper:y:2}      \\
-	         Z_2 &= T_z                                    \label{eq:ik:upper:z:2}
-\end{align}
+A figura~\ref{fig:softwarearchitecture:overview} mostra uma visão simplificada dos principais componentes -- e o sentido do fluxo de dados entre eles -- envolvidos no processo qualquer tarefa genérica. O funcionamento de cada componente individual será detalhado nas próximas seções.
 
-Seguindo o processo de parametrização dos ângulos das juntas, observa-se na figura~\ref{fig:ik:frontalview} a visão frontal de Arash provendo uma visualização geométrica das equações~\ref{eq:ik:p:hip:roll} até \ref{eq:ik:z:3}. Nesta figura observa-se, também, o movimento no eixo $roll$ do quadril sendo compensado pelo movimento no sentido oposto (mas no mesmo eixo) do pé, afim de compensar o alinhamento do pé com o piso.
+\subsection{Visão}
+
+Visão não é o foco deste trabalho. Entretanto, uma explanação geral é necessária afim de melhor entender o funcionamento geral do sistema.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=1]{imagens/svg/softwarearchitecture-vision}
+	\caption{Diagrama de sequência do componente de visão.}
+	\label{fig:softwarearchitecture:vision}
+\end{figure}
+
+O controle de visão é um software que conecta-se via USB com a câmera, analisando as imagens e extraindo informações relevantes à execução da tarefa do robô. De forma geral, podemos abstrair seu funcionamento em duas \textit{threads} distintas:
+
+A primeira é o \textit{loop} principal, representada no diagrama de sequência na figura \ref{fig:softwarearchitecture:vision}. Em um primeiro passo, o controlador obtém a imagem da câmera. Em seguida, a extração de informações é realizada. Esse processo depende da tarefa que o robô deve realizar; tais como detectar a bola, os adversários e as linhas do campo, em caso de futebol ou detectar as linhas guia da pista de corrida no caso da maratona. Em seguida, tudo o que foi encontrado é salvo para futuras consultas até que a próxima iteração ocorra e os dados sejam atualizados.
+
+A segunda \textit{thread}, visualizada na figura~\ref{fig:softwarearchitecture:software}, do controle de visão executa o sistema de comunicação que pode ser implementado de várias maneiras, desde objetos \textit{JSON} sendo transmitidos via \textit{UDP} até um \textit{message broker} com filas de consumo. Ao receber a mensagem de solicitação das informações, responde serializando os dados que ficaram salvos na primeira \textit{thread}, fornecendo as informações com atraso mínimo.
+
+\subsection{Controlador de Comportamento}
+
+O controlador de comportamento, que roda na camada de \textit{software}, implementa a tarefa que deve ser realizada pelo robô. Ele funciona como um gerente que coordena outros componentes, recebendo informações e enviando comandos com ações específicas serem a executadas. Na figura~\ref{fig:softwarearchitecture:software} é possível observar a sequência de passos realizados pelo controlador de comportamento.
+
+Usando como exemplo uma partida de futebol, na figura~\ref{fig:softwarearchitecture:software} observa-se o controlador de comportamento ``jogador'' consultando o componente de visão, que responde a posição da bola, previamente obtida durante o processo da figura~\ref{fig:softwarearchitecture:vision}. Em seguida, baseado nessas informações o comportamento envia o comando ao \textit{walking gait} para caminhar na direção correta.
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[scale=1.5]{imagens/svg/inverse-kinematics-frontalview}
-	\caption{Diagrama da visão frontal de Arash que representa da equação~\ref{eq:ik:p:hip:roll} até~\ref{eq:ik:z:3}}
-	\caption*{\cite{karimionline}}
-	\label{fig:ik:frontalview}
+	\includegraphics[scale=1]{imagens/svg/softwarearchitecture-software}
+	\caption{Diagrama de sequência do controlador de comportamento e suas dependências.}
+	\label{fig:softwarearchitecture:software}
 \end{figure}
 
-\begin{align}
-	 P[Hip_{roll}] &= atan\bigg(\dfrac{Y_2}{Z_2}\bigg)                    \label{eq:ik:p:hip:roll}     \\
-	P[Foot_{roll}] &= -P[Hip_{roll}] + R_{roll}                            \label{eq:ik:p:foot:roll}    \\
-			   X_3 &= X_2                                                   \label{eq:ik:x:3}            \\
-			   Y_3 &= Y_2                                                    \label{eq:ik:y:3}            \\
-	           Z_3 &= \sqrt{Y_2^{\hspace{1mm}2} + {Z_2}^{\hspace{1mm}2}}      \label{eq:ik:z:3}
-\end{align}
+\subsection{\textit{Walking Gait} e Leitor de Orientação}
 
-Na terceira etapa, a figura~\ref{fig:ik:frontalview} mostra a visão frontal de Arash, também, provendo uma visualização geométrica das equações~\ref{eq:ik:p:hip:roll} até \ref{eq:ik:z:3}.
+O componente \textit{walking gait} coordena e executa a caminhada. Ele monitora a USB aguardando os comandos de controle que contém as velocidades da caminhada, enviados a partir do controlador principal.
+
+O componente leitor de orientação desempenha um papel importante ao lado do \textit{walking gait}. Ele é o responsável pela verificação da orientação da rotação do torso -- uma vez que a \textit{IMU} está situada nas costas de Arash -- assim fornecendo dados para o \textit{walking gait} fazer correções durante a caminhada afim de compensar um eventual distúrbio.
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[scale=1.5]{imagens/svg/inverse-kinematics-sideview}
-	\caption{Diagrama da visão lateral de Arash que representa da equação~\ref{eq:ik:p:hip:roll} até~\ref{eq:ik:z:3}}
-	\caption*{\cite{karimionline}}
-	\label{fig:ik:sideview}
+	\includegraphics[scale=0.8]{imagens/svg/softwarearchitecture-lowlevel}
+	\caption{Diagrama de sequência do \textit{walking gait} e do leitor de orientação.}
+	\label{fig:softwarearchitecture:lowlevel}
 \end{figure}
 
-\begin{align}
-	       d_{foot} &= \sqrt{Z_3^{\hspace{1mm}2} + X_3^{\hspace{1mm}2}}     \label{eq:ik:d:foot}        \\
-	         \alpha &= atan\bigg(\dfrac{X_3}{Z_3}\bigg)                      \label{eq:ik:alpha}         \\
-	          \beta &= acos\bigg(\dfrac{d_{foot}}{2 \times Leg_{len}}\bigg)   \label{eq:ik:beta}          \\
-	 P[Hip_{pitch}] &= \alpha + \beta                                          \label{eq:ik:p:hip:pitch}   \\
-	        P[Knee] &= -2 \beta                                                 \label{eq:ik:p:knee}        \\
-	P[Foot_{pitch}] &= \gamma = -\alpha + \beta + R_{pitch}                      \label{eq:ik:p:foot:pitch}
-\end{align}
+No componente leitor de orientação, os dados são coletados da \textit{IMU} e um processo de utilizando filtro de \todo{Explicar este processo melhor}\textit{Kalman} é utilizado para obter ua estimativa mais acurada das orientações que são salvas em variáveis. Já na \textit{thread} que roda o \textit{walking gait}, a orientação é continuamente consultada e utilizada para que os ângulos das juntas sejam atualizados.
 
-Adicionalmente, a cada junta é somado um parâmetro de deslocamento -- não incluso nas equações de \textit{IK} --, também conhecido como \textit{offset}, para compensar possíveis erros provenientes de desalinhamentos no momento de montagem do robô, ou folgas nas engrenagens dos atuadores.
+Dentro da placa microcontroladora \textit{OpenCM9.04}, o \textit{walking gait} e o leitor de orientação rodam em \textit{threads} dinstintas, recurso este habilitado pela biblioteca \textit{MapleFreeRTOS}.
 
-Finalmente, com as equações de \textit{IK} definidas, o \textit{walking gait}, com o auxílio dos componentes de orientação e \textit{proxy}, é apto a fazer os cálculos necessários para determinar os movimentos de caminhada.
+Na figura~\ref{fig:softwarearchitecture:lowlevel} observa-se a execução de ambas a \textit{threads} separadamente e a forma de interação entre elas. Iniciando a partir do \textit{walking gait}, ele lê os dados de orientação diretamente do leitor de orientação, em seguida calcula as posições das juntas que são enviadas aos motores. Em paralelo, o leitor de orientação continua recebendo os dados da \textit{IMU}, processando e salvando-os para que fiquem disponíveis ao \textit{walking gait}. Nota-se que, em ambas as threads, as sequências de ações são executadas dentro de \textit{loops} principais, já que este é um processo iterativo e contínuo.
+
+\section{A nova arquitetura}
+
+De acordo com os problemas e solução já discutidos em seções anteriores, esta seção irá apresentar as mudanças realizadas na arquitetura original apresentada na seção~\ref{sec:architecture:overview}.
+
+Uma das principais mudanças realizadas neste trabalho é a re-implementação do \textit{walking gait}. Para tanto, ainda faz-se necessário a a utilização da \textit{OpenCM9.04}. Desta vez, ela assume o papel de reencaminhar os dados dos ângulos aos motores e, ainda, fornecer os dados de orientação ao \textit{walking gait}.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=1]{imagens/svg/softwarearchitecture-newproposal}
+	\caption{Diagrama de orientação dos atuadores de Arash.}
+	\label{fig:softwarearchitecture:newproposal}
+\end{figure}
+
+A figura~\ref{fig:softwarearchitecture:newproposal} mostra a visão simplificada da nova arquitetura. Nela observa-se o \textit{walking gait} -- agora na camada de \textit{software} -- funcionando dentro do controlador principal, e um novo componente chamado \textit{proxy} é apresentado como interface os componentes de \textit{hardware} e o \textit{walking gait}. O papel do novo componente é de servir realmente como um \textit{proxy} enviando comandos recebidos do controlador principal aos motores e também receber a orientação do componente leitor de orientação e fornecê-la ao controlador principal.
+
+O controlador de comportamento continua a enviar os comandos de controle ao \textit{walking gait}. Porém, ao invés de usar \todo{Especificar esses comandos na seção onde fala sobre esses comandos}comandos binários via \abrv[USB -- \textit{Universal Serial Bus}]{USB}, agora utiliza objetos serializados via \abrv[JSON -- \textit{Java Script Object Notation}]{JSON} via rede.
+
+Entre o \textit{walking gait} e o \textit{proxy} a comunicação ocorre via USB @ 1 Mbps. Comandos de controle utilizando o \textit{dynamixel protocol 1.0} são gerados e enviados diretamente do \textit{walking gait} ao \textit{proxy}, que apenas os encaminha aos motores. Esta estratégia foi adotada para habilitar a possibilidade da utilização de motores de diferentes tipos, não apenas da Robotis Co. Assim, apenas o \textit{walking gait} é responsável pela geração de destes comandos específicos de cada motor enquanto o \textit{proxy} apenas os encaminha.
+
+Na camada de software de baixo nível, o leitor de orientação continua a fornecer os dados de orientação. Porém, ao invés do \textit{walking gait} acessá-los diretamente, o \textit{proxy} encarrega-se de disponibiliza-los ao \textit{walking gait}.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=1]{imagens/svg/softwarearchitecture-newproposal-sequence}
+	\caption{Diagrama de sequência simplificado com as modificações na arquitetura.}
+	\label{fig:softwarearchitecture:newproposal:sequence}
+\end{figure}
+
+Na figura~\ref{fig:softwarearchitecture:newproposal:sequence}, é possível observar o diagrama de sequência com os componentes que foram atingidos pela mudança na arquitetura. O \textit{walking gait} lê os dados de orientação, calcula as novas posições das juntas e envia os novos ângulos ao \textit{proxy}, então inicia o processo do início. O \textit{proxy} obtém os dados de orientação diretamente do leitor de orientação, em seguida os fornece ao \textit{walking gait}.
+
+\section{\textit{Walking gait}}
+
+Nesta seção detalhes arquiteturais da implementação do \textit{walking gait} são descritos.
+
+Ao realizar a nova implementação do \textit{walking gait}, uma mudança completa de paradigma foi realizada, do paradigma estruturado ao orientado a objetos. Afim de facilitar o desenvolvimento, o projeto foi divido em \todo{Conferir a quantidade de submódulo}$3$ submódulos: o servidor de controle, o motor de caminhada e o atualizador de juntas.
+
+\todo{Verificar a localidade deste parágrafo. Ele foi escrito mas parece estar fora do lugar além de duplicar informações.}Para realizar a tarefa de forma adequada, o componente faz uso de multi-processamento. Três \textit{threads} dentro do componente são responsáveis por tarefas específicas essenciais ao complemento do comportamento geral da caminhada: A \textit{thread} de rede, a \textit{thread} atualização dos motores e a \textit{thread} principal.
+
+\subsection{Servidor de controle}
+
+O servidor de controle é um submódulo que é implementa a interface de comunicação do \textit{walking gait} a outros componentes do sistema. De fato, todo o gerenciamento da caminhada pode ser realizada a partir de um único comando que atualizam as velocidades $V_x$, $V_y$ e $V_\theta$.
+
+\begin{figure}[htb]
+	\begin{lstlisting}[language=json,firstnumber=1]
+{
+  "command": "omniwalk",
+  "params":
+  {
+    "x": 0.3, // Opcional: Velocidade no eixo X
+    "y": 0.6, // Opcional: Velocidade no eixo Y
+    "theta": 0.0  // Opcional: Velocidade no eixo teta
+  }
+}
+	\end{lstlisting}
+	\caption{Comando de controle exemplo em JSON.}
+	\label{fig:architecture:walkinggait:controller:json}
+\end{figure}
+
+Para tal tarefa, adotou-se uma solução simplista que consiste em receber objetos serializados \textit{JSON} através de um servidor \textit{UDP}, principalmente por causa de sua rápida implementação.
+
+Sabe-se que o protocolo UDP não garante a integridade, nem a ordem, da entrega dos dados. Todavia, a aplicação inteira roda dentro da rede de \textit{loopback} garantindo a garantia dos pacotes. Para este caso específico, a não verificação dos pacotes pelo protocolo UDP, reverte-se em vantagem já que não há o atraso de tempo necessário para sincronizar as duas pontas da comunicação. Além disso, esta abordagem aproveita-se da filosofia \textit{zero-copy} adotada pelo \textit{kernel} do Linux \cite{tianhua2008} que evita fazer cópia dos \textit{buffers} das mensagens recebidas via rede, desde o \textit{driver} de rede até a entrega na aplicação.
+
+Na figura~\ref{fig:architecture:walkinggait:controller:json} é a propriedade \textit{command} que identifica a intenção do comando de alterar os parâmetros da caminhada. A propriedade \textit{params} indica um sub-objeto \textit{JSON} com as propriedades \textit{x} equivalente a $V_x$, \textit{y} equivalendo a $V_y$ e \textit{theta} representando $V_\theta$. Todas as propriedades são opcionais, e caso não sejam informadas, nenhuma modificação será feita naquele eixo específico.
+
+Em caso de intenção de parada, o mesmo comando \textit{omniwalk} deverá ser enviado porém com todas as velocidades com valor $0.0$.
+
+\subsection{Motor de caminhada}
+
+\todo{Encher este parágrafo}O motor de caminhada é onde encontram-se todas as implementações do cálculo das juntas.
+
+A classe $Humanoid$ é usada para a manter o estado das juntas, tanto posição quanto angulações. Ela também é usada para manter os estados das juntas durante os cálculos da \textit{IK}.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=0.4]{imagens/svg/walkinggait-domain}
+	\caption{Diagrama de domínio do \textit{walking gait}.}
+	\label{fig:architecture:walkinggait:domain}
+\end{figure}
+
+A figura~\ref{fig:architecture:walkinggait:domain} mostra o diagrama de domínio das classes mais relevantes aos dados que o componente manipula. Observa-se todas as composições envolvidas na definição da classe $Humanoid$ é uma agregação de diversas outras classes que representam cada parte de Arash. É possível também observar que nas classes $Head$, $Arm$, $Hip$, $Knee$, $Foot$ existem dados ângulo e velocidade. Isso se dá por causa que componente utiliza essas informações para calcular o próximo estado do sistema em caso de algum distúrbio. Nota-se também, que a classe $Leg$ aparece de forma ambígua, já que existem as definições de $Hip$, $Knee$ e $Foot$. Porém, a classe $Leg$, representa os dados da cinemática inversa de uma perna, enquanto as demais classes guardam o estado atual das partes que representam.
+
+Ainda na figura~\ref{fig:architecture:walkinggait:domain}, nota-se a notação dos dados utilizados: $angle2d$, $angle3d$ e $vector3d$. Estes tipos possuem o sufixo numérico, que indica a quantidade de dimensões aquela classe guarda, e a letra, que indica o tipo de dado, no caso $d$ é referente a $double$. Para ângulos, $2$ dimensões significa que os eixos de rotação $pitch$ e $roll$ são guardados; já os ângulos com $3$ eixos, as orientações $roll$, $pitch$ e $yaw$ são guardadas. Para vetores, os valores nas dimensões $x$, $y$ e $z$ são mantidos.
+
+O processo de caminhada inicia-se no momento em que qualquer velocidade é diferente de zero. No momento que isso ocorre (ou seja, um comando de controle é recebido), a instância da classe $Robot$, doravante referida apenas como $robot$, através de seu método $omniGait$, faz uma transição entre a velocidade atual e a nova velocidade de forma suave. A medida que a velocidade é gradualmente alterada para seu novo valor, o relógio central é iniciado e o método $updateTrajectories$ é chamado, calculando a trajetória (de acordo com a seção \ref{sec:math:trajectories}) e estocando-a na variável de instância $humanoid$, do tipo $Humanoid$. Enfim, o método $update$ de $Ik$ é chamado para que execute os cálculos da cinemática inversa. O diagrama de sequência simplificado na figura~\ref{fig:architecture:walkinggait:walkengine:sequence} mostra este processo.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=0.5]{imagens/svg/walkinggait-walkingengine-sequence}
+	\caption{Diagrama de sequência simplificado do motor de caminhada.}
+	\label{fig:architecture:walkinggait:walkengine:sequence}
+\end{figure}
+
+\subsection{Atualizador de juntas}
+\label{subsec:architecture:walkinggait:jointsupdater}
+
+\begin{center}
+	\color{red}
+	\center	
+	\LARGE Incompleto, em desenvolvimento.
+\end{center}
+
+Este módulo é responsável pela atualização dos ângulos dos motores. Ele roda em sua própria \textit{thread}, afim de não bloquear o processamento do \textit{walking gait}.
+
+A implementação padrão do atualizador de juntas, usa uma abstração de motores afim de prover o uso de motores de diferentes fabricantes em futuras aplicações.
+
+Como classe base, temos a classe $Actuator$ que define a propriedade básica de todos os atuadores.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=0.5]{imagens/svg/softwarearchitecture-actuators-hierarchy}
+	\caption{Fragmento do diagrama de classe da hierarquia dos atuadores.}
+	\label{fig:architecture:walkinggait:walkengine:sequence}
+\end{figure}
+
+Para a atualização dos dados, Para tanto, ele precisa comunicar-se com os o componente \textit{Proxy} via USB. Assim, uma conexão é aberta com o dispositivo.
