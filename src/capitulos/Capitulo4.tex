@@ -26,7 +26,7 @@ A camada de software é executada dentro de um computador, doravante referido co
 \begin{figure}[htb]
 	\centering
 	\includegraphics[scale=1]{imagens/svg/softwarearchitecture-flow}
-	\caption{Visão simplificada da arquitetura do sistema e seus fluxos.}
+	\caption{Fluxograma simplificada da arquitetura atual e seus fluxos.}
 	\label{fig:softwarearchitecture:overview}
 \end{figure}
 
@@ -79,7 +79,7 @@ No componente leitor de orientação, os dados são coletados da \textit{IMU} e 
 
 Dentro da placa microcontroladora \textit{OpenCM9.04}, o \textit{walking gait} e o leitor de orientação rodam em \textit{threads} dinstintas, recurso este habilitado pela biblioteca \textit{MapleFreeRTOS}.
 
-Na figura~\ref{fig:softwarearchitecture:lowlevel} observa-se a execução de ambas a \textit{threads} separadamente e a forma de interação entre elas. Iniciando a partir do \textit{walking gait}, ele lê os dados de orientação diretamente do leitor de orientação, em seguida calcula as posições das juntas que são enviadas aos motores. Em paralelo, o leitor de orientação continua recebendo os dados da \textit{IMU}, processando e salvando-os para que fiquem disponíveis ao \textit{walking gait}. Nota-se que, em ambas as threads, as sequências de ações são executadas dentro de \textit{loops} principais, já que este é um processo iterativo e contínuo.
+Na figura~\ref{fig:softwarearchitecture:lowlevel} observa-se a execução de ambas a \textit{threads} separadamente e a forma de interação entre elas. Iniciando a partir do \textit{walking gait}, ele lê os dados de orientação diretamente do leitor de orientação, em seguida calcula as posições das juntas que são enviadas aos motores. Em paralelo, o leitor de orientação continua recebendo os dados da \textit{IMU}, processando e salvando-os para que fiquem disponíveis ao \textit{walking gait}. Nota-se que, em ambas as \textit{threads}, as sequências de ações são executadas dentro de \textit{loops} principais, já que este é um processo iterativo e contínuo.
 
 \section{A nova arquitetura}
 
@@ -90,13 +90,13 @@ Uma das principais mudanças realizadas neste trabalho é a re-implementação d
 \begin{figure}[h!]
 	\centering
 	\includegraphics[scale=1]{imagens/svg/softwarearchitecture-newproposal}
-	\caption{Diagrama de orientação dos atuadores de Arash.}
+	\caption{Fluxograma simplificado da nova arquitetura e seus fluxos de dados.}
 	\label{fig:softwarearchitecture:newproposal}
 \end{figure}
 
 A figura~\ref{fig:softwarearchitecture:newproposal} mostra a visão simplificada da nova arquitetura. Nela observa-se o \textit{walking gait} -- agora na camada de \textit{software} -- funcionando dentro do controlador principal, e um novo componente chamado \textit{proxy} é apresentado como interface os componentes de \textit{hardware} e o \textit{walking gait}. O papel do novo componente é de servir realmente como um \textit{proxy} enviando comandos recebidos do controlador principal aos motores e também receber a orientação do componente leitor de orientação e fornecê-la ao controlador principal.
 
-O controlador de comportamento continua a enviar os comandos de controle ao \textit{walking gait}. Porém, ao invés de usar \todo{Especificar esses comandos na seção onde fala sobre esses comandos}comandos binários via \abrv[USB -- \textit{Universal Serial Bus}]{USB}, agora utiliza objetos serializados via \abrv[JSON -- \textit{Java Script Object Notation}]{JSON} via rede.
+O controlador de comportamento continua a enviar os comandos de controle ao \textit{walking gait}. Porém, ao invés de usar comandos binários via \abrv[USB -- \textit{Universal Serial Bus}]{USB}, agora utiliza objetos serializados via \abrv[JSON -- \textit{Java Script Object Notation}]{JSON}{}via rede.
 
 Entre o \textit{walking gait} e o \textit{proxy} a comunicação ocorre via USB @ 1 Mbps. Comandos de controle utilizando o \textit{dynamixel protocol 1.0} são gerados e enviados diretamente do \textit{walking gait} ao \textit{proxy}, que apenas os encaminha aos motores. Esta estratégia foi adotada para habilitar a possibilidade da utilização de motores de diferentes tipos, não apenas da Robotis Co. Assim, apenas o \textit{walking gait} é responsável pela geração de destes comandos específicos de cada motor enquanto o \textit{proxy} apenas os encaminha.
 
