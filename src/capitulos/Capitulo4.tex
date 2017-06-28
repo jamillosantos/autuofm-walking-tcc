@@ -2,9 +2,9 @@
 \chapter{Arquitetura}
 \label{ch:architecture}
 
-Inicialmente, a arquitetura adotada pelo time AUT-UofM é uma arquitetura distribuída, baseada no \textit{framework} \abrv[ROS -- \textit{Robot Operating System}]{ROS}. Como a robótica tenta solucionar problemas em diversas áreas da computação. Desde o controle de motores, usando programação de baixo nível, até soluções sofisticas utilizando \abrv[IA -- Inteligência artificial]{IA (Inteligência artificial)} aplicada a visão e tomada de decisões, entre outros.
+A robótica tenta solucionar problemas envolvendo diversas áreas da computação. Desde o controle de motores, usando programação de baixo nível, até soluções sofisticas utilizando \abrv[IA -- Inteligência artificial]{IA (Inteligência artificial)} aplicada a visão e tomada de decisões, entre outros. Assim, o desenvolvimento de uma única ferramenta, em uma única linguagem, que solucione todos os problemas pode tornar-se inviável, já que linguagens diferentes são projetadas com intenções diferentes e problemas diferentes em mente.
 
-Assim, o desenvolvimento de uma única ferramenta, em uma única linguagem, que solucione todos os problemas pode tornar-se inviável, já que linguagens diferentes são projetadas com intenções diferentes e problemas diferentes em mente.
+Para solucionar este problema, a arquitetura adotada pelo time AUT-UofM é distribuída, baseada no \textit{framework} \abrv[ROS -- \textit{Robot Operating System}]{ROS}. Onde cada componente tem uma função diferente dentro do sistema total. 
 
 Desta forma, este capítulo divide cada subsistema dentro do robô como componentes apresentando suas funções antes e após implementadas as mudanças propostas pelo trabalho em suas diferentes camadas de execução. Alguns deles são mais detalhados e descritos em seus módulos, apresentando alguns fluxogramas e diagramas afim de expressar melhor seu funcionamento.
 
@@ -119,6 +119,8 @@ Ao realizar a nova implementação do \textit{walking gait}, uma mudança comple
 
 \todo{Verificar a localidade deste parágrafo. Ele foi escrito mas parece estar fora do lugar além de duplicar informações.}Para realizar a tarefa de forma adequada, o componente faz uso de multi-processamento. Três \textit{threads} dentro do componente são responsáveis por tarefas específicas essenciais ao complemento do comportamento geral da caminhada: A \textit{thread} de rede, a \textit{thread} atualização dos motores e a \textit{thread} principal.
 
+Para todos os parâmetros de configuração -- tais como as portas do de controle do visualizador 3D e servidor de controle (descritos nas próximas seções), deslocamentos físicos das juntas (\textit{offsets}), peso de compensação do processo de  \textit{swing} do corpo ($B_{swing}$), a frequência de geração dos moimentos ($Gait_{frequency}$), o \textit{walking gait} possui um esquema de configurações baseado em objetos JSON salvos em arquivos. Desta forma, é possível inicializar o componente com diversas parâmetros diferentes. Assim, também é possível o versionamento dos arquivos de configuração, para que alterações sejam mantidas de forma rastreável.
+
 \subsection{Servidor de controle}
 \label{subsec:architecture:walkinggait:controlserver}
 
@@ -177,7 +179,7 @@ O processo de caminhada inicia-se no momento em que qualquer velocidade é difer
 \subsection{Atualizador de juntas}
 \label{subsec:architecture:walkinggait:jointsupdater}
 
-\todo{Citar a thread.}Este módulo é responsável pela atualização dos ângulos dos motores. Ele roda em sua própria \textit{thread}, afim de não bloquear o processamento do \textit{walking gait}.
+\todo{Citar a thread.}Este módulo é responsável pela atualização dos ângulos dos motores. Ele roda em sua própria \textit{thread}, afim de não bloquear o processamento dos demais componentes do \textit{walking gait}.
 
 A implementação padrão do atualizador de juntas, usa uma abstração de motores afim de prover o uso de motores de diferentes fabricantes em futuras aplicações.
 

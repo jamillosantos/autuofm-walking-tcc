@@ -48,12 +48,14 @@ Para caminhar, Arash move suas juntas de uma forma sincronizada mantendo o equil
 
 O processo de caminhada é dividido em ciclos. Cada ciclo é dado pelo movimentos de passo da perna direita seguido pelo movimento da perna esquerda. O caminho percorrido pelos pés, suas posição e rotação, é predeterminado pelo \textit{walking gait} e é referido como trajetória.
 
-A cada momento no tempo do ciclo -- levando em consideração também outras variáveis -- a trajetória fornece a posição e rotação de ambos os pés de Arash. A frequência de cada ciclo é definida por um relógio central definido no intervalo exibido na equação~\ref{eq:math:centraclock}, sendo $t$ o tempo do ciclo atual da caminhada.
+A cada momento no tempo do ciclo -- levando em consideração também outras variáveis -- a trajetória fornece a posição e rotação de ambos os pés de Arash. O tempo de cada ciclo é definida por um relógio central definido no intervalo exibido na equação~\ref{eq:math:centraclock}, sendo $t$ o tempo do ciclo atual da caminhada.
 
 \begin{equation}
 	\label{eq:math:centraclock}
 	0 \leq t < 2\pi
 \end{equation}
+
+Dentro do tempo do relógio central, existe a frequência que os movimentos são gerados, identificado por $Gait_{frequency}$. Este parâmetro indica a quantidade de posições geradas por segundo.
 
 No conceito de caminhada omnidirecional são utilizadas 3 velocidades afim de controlar a direção e velocidade do robô. $V_x$ é a velocidade em direção à frente, com valores positivos para a frente e negativos para caminhar de costas. $V_y$ é a velocidade lateral com onde passos para o lado são definidos com valores positivos implicando em movimentos laterais à direita. $V_\theta$ é a velocidade de rotação por passo com valores positivos indicando rotação também à direita.
 
@@ -66,7 +68,7 @@ Na figura~\ref{fig:math:velocities} é possível observar o diagrama com as posi
 	\label{fig:math:velocities}
 \end{figure}
 
-Como mostra as equações~\ref{eq:math:velocities:intervals}, valores normalizados entre $-1.0$ e $1.0$ são utilizados para indicar as velocidades. Adotando-se $0.0$ como velocidade nula, ou sem movimento, $1.0$ como valor de velocidade máxima e $-1.0$ como valor de velocidade máxima no sentido oposto. Valores normalizados foram adotados para abstrair valores de velocidades absolutos já que futuras aplicações deste trabalho podem utilizar diferentes configurações de robôs. Desta forma, o controlador de comportamento pode abstrair a configuração do robô que está sendo controlado e enviando velocidades relativas. Adicionalmente, valores normalizados provém a integração perfeita entre as funções trigonométricas para a definição das trajetórias senoidais adotadas por \textit{Kamiri et al}.
+Como mostra as equações~\ref{eq:math:velocities:intervals}, valores normalizados entre $-1.0$ e $1.0$ são utilizados para indicar as velocidades. Adotando-se $0.0$ como velocidade nula, ou sem movimento, $1.0$ como valor de velocidade máxima e $-1.0$ como valor de velocidade máxima no sentido oposto. Valores normalizados foram adotados para abstrair valores de velocidades absolutos já que futuras aplicações deste trabalho podem utilizar diferentes configurações de robôs. Desta forma, o controlador de comportamento pode abstrair a configuração do robô que está sendo controlado e enviando velocidades relativas. Adicionalmente, valores normalizados provém a integração perfeita entre as funções trigonométricas para a definição das trajetórias senoidais adotadas por \textit{Karimi et al}.
 
 \begin{equation}
 \label{eq:math:velocities:intervals}
@@ -91,7 +93,7 @@ Em poder desses vetores, utiliza-se os conceitos da cinemática inversa para ger
 \section{Orientação}
 \label{sec:math:orientation}
 
-Durante a implementação deste trabalho, nenhuma modificação foi realizada no componente de orientação originalmente desenvolvido por Kamiri \textit{et al}. Entretanto, para a implementação do cálculo da trajetórias é necessário algumas informações sobre a saída deste componente.
+Durante a implementação deste trabalho, nenhuma modificação foi realizada no componente de orientação originalmente desenvolvido por Karimi \textit{et al}. Entretanto, para a implementação do cálculo da trajetórias é necessário algumas informações sobre a saída deste componente.
 
 No final do processamento, obtém-se como saída um vetor com de aceleração linear nos eixos $x$ e $y$, como mostra a equação~\ref{eq:orientation:accel:definition}. Então, o vetor $Accel$ é utilizado para o cálculo da detecção de ``empurrões'', ou distúrbios, como visto nas equações \ref{eq:orientation:push:x} e \ref{eq:orientation:push:y}, que representação a variação na aceleração linear entre a iteração atual e a anterior.
 
@@ -107,7 +109,7 @@ No final do processamento, obtém-se como saída um vetor com de aceleração li
 \section{Geração da trajetória}
 \label{sec:math:trajectories}
 
-Como afirmado anteriormente, a trajetória define a posição e rotação de ambos os pés de Arash durante cada momento do ciclo de caminhada, gerando como saída dois vetores $T$ e $R$, como definido na equação~\ref{eq:math:T_and_R:definition}. Kamiri \textit{et al} definem as funções que determinam cada eixo dos vetores, da equação \ref{eq:math:trajectories:foot:x} até \ref{eq:math:trajectories:foot:yaw}.
+Como afirmado anteriormente, a trajetória define a posição e rotação de ambos os pés de Arash durante cada momento do ciclo de caminhada, gerando como saída dois vetores $T$ e $R$, como definido na equação~\ref{eq:math:T_and_R:definition}. Karimi \textit{et al} definem as funções que determinam cada eixo dos vetores, da equação \ref{eq:math:trajectories:foot:x} até \ref{eq:math:trajectories:foot:yaw}.
 
 \begin{align}
       Foot_x &= \bigg(\dfrac{-cos(t) + 1}{2}\bigg) \times \bigg(\dfrac{tanh(V_x + Push_x) + H_{leg}}{\pi}\bigg)                    \label{eq:math:trajectories:foot:x}  \\
@@ -128,7 +130,7 @@ Descobrir a posição de um parte do robô a partir dos ângulos de suas juntas,
 
 Enquanto a problemas envolvendo a \textit{forward kinematics} possuem uma solução única, na \textit{IK} podem haver múltiplas soluções ou nenhuma \cite{spong2005robot}. Pode-se observar este fato ao tocar a ponta do próprio nariz, já que existem diversas combinações de posições do ombro, cotovelo, pulso e falanges que resolvem este problema; Entretando, usando as configurações de braço de um Tiranossauro o problema não teria solução, uma vez que o braço é demasiado curto para efetuar tal tarefa.
 
-Aplicando a teoria da cinemática inversa ao problema proposto, Kamiri \textit{et al} apresenta uma solução direta aproveitando-se das limitações impostas pela configuração das juntas de Arash.
+Aplicando a teoria da cinemática inversa ao problema proposto, Karimi \textit{et al} apresenta uma solução direta aproveitando-se das limitações impostas pela configuração das juntas de Arash.
 
 \begin{equation}
 	\label{eq:math:ik:P:definition}
