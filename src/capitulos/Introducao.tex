@@ -1,53 +1,33 @@
 % Introdução
 \chapter{Introdução}
 
-\begin{guide}
-	\begin{itemize}
-		\item Contexto
-		\item Motivação
-		\item O problema
-		\item Soluções similares
-		\item Solução proposta
-	\end{itemize}
-\end{guide}
+A robótica está cada vez mais avançada e acessível. Seja em um pequeno robô aspirador de pó autônomo - que até mesmo retorna à estação de recarregamento quando sua bateria está fraca - ou nos sofisticados robôs que automatizam a fabricação de carros, aumentando a produção e diminuindo o custo. E eles vem em todos os tamanhos e formas.
 
-\todo{Normalizar todas as nomenclaturas do \textit{walking gait}, as vezes chama-se sistema, as vezes chama-se componente.}
-
-\begin{draft}
-Nos dias atuais, a robótica está cada vez mais avançada e acessível. Seja em um pequeno robô aspirador de pó autônomo - que até mesmo retorna à estação de recarregamento quando sua bateria está fraca - ou nos sofisticados robôs que automatizam a fabricação de carros, aumentando a produção e diminuindo o custo. E eles vem em todos os tamanhos e formas.
-\end{draft}
-
-Vivemos em um mundo feito e projetado para humanos. De escadas, portas, e até ferramentas como furadeiras, ou até o mouse são pensados para o uso diário de uma forma humanoide. Desta forma, nada mais obvio que projetar um robô humanoide que adapte-se de forma natural a este ambiente. Porém, a forma humanoide impõe diversos desafios de controle, basta uma breve busca no YouTube por "darpa challange fails".
-
-\begin{guide}
-	Falar das dificuldades na robótica humanoide e fazer uma contextualização
-	da caminhada citando alguns trabalhos recentes.
-\end{guide}
+Vivemos em um mundo feito e projetado para humanos. De escadas, portas, e até ferramentas como furadeiras, ou até o mouse são pensados para o uso diário de ser humano. Desta forma, nada mais obvio que projetar um robô humanoide que adapte-se de forma natural a este ambiente. Porém, esta forma impõe diversos desafios de controle, basta uma breve busca no YouTube por "darpa challange fails".
 
 Em um esforço mútuo, as universidades \textit{Amirkabir University of Technology} (AUT), do Irã, e a \textit{University of Manitoba} (UofM), do Canadá, trabalham juntas para participar da Robocup - competição internacional de futebol de robôs cujo o objetivo é derrotar a seleção campeã mundial na copa de 2050. Nas edições 2015 e 2016, realizada em Hefei (China) e Leipzig (Alemanhã), o sistema que controlou a caminhada de \textit{Arash}; um robô humanóide de 100cm de altura rendeu o 3º lugar na modalidade de futebol em ambos os anos. Também, os 2º e 1º lugar no modalidade do desafio técnico em 2015 e 2016.
 
-Desenvolvido utilizando placa microcontroladora \textit{OpenCM 9.04}, compatível com Arduino, e batizado de \textit{AUT-UofM-Walk-Engine}, o sistema de caminhada foi um dos grandes responsáveis pelo bom desempenho. Entretando, o fato de rodar dentro da \textit{OpenCM9.04} traz uma série de consequências não desejáveis ao palco.
+Desenvolvido utilizando placa microcontroladora \textit{OpenCM 9.04}, compatível com Arduino, e batizado de \textit{AUT-UofM-Walk-Engine}, o sistema de caminhada, ou \textit{walking gait}, foi um dos grandes responsáveis pelo bom desempenho nas competições. Entretando, o fato de rodar dentro da \textit{OpenCM9.04} traz uma série de consequências não desejáveis ao palco.
 
 Inicialmente, sendo um sistema complexo, a caminhada deve ser configurada para cada tipo de superfície. As configurações de uma superfície lisa e áspera, como concreto, podem ser bastante diferentes das configurações para caminhar num terreno como a grama artificial utilizada na Robocup. Essas mudanças nas configurações são determinantes para o bom equilíbrio do robô. Com mais de 100 parâmetros, esse processo de configuração requer muito tempo e paciência.
 
-O primeiro problema com a implementação atual é que a configuração se dá através de alterações diretas dos valores dos parâmetros no código-fonte, em seguida compila-se, envia-se a nova versão à \textit{OpenCM9}. Em seguida, inicializa-se o robô e verifica-se a caminhada. Além de massante, este esquema de atualização não favorece uma forma sadia de manter as alterações dos parâmetros organizada. Há uma frequente perda de quais valores de parâmetros são melhores para qual tipo de situação. Uma solução seria criar subversões do sistema para cada cenário, o que desfavorece a correção de \textit{BUGs} e melhorias, já que cada modificação deve ser refletida em várias versões. Uma segunda possibilidade seria criar uma interface de comunicação entre um computador, que funcionaria como um gerenciador, e o \todo{Introduzir a expressão \textbf{\textit{walking gait}}.} \textit{walking gait} via USB. Assim, o computador poderia guardar arquivos de configurações que seriam enviados à placa microcontroladora a medida que fossem necessários, o que seria uma saída simples e eficaz, mas não definitiva, tendo em vista outros problema citados abaixo.
+O primeiro problema com a implementação atual é que a configuração se dá através de alterações diretas dos valores dos parâmetros no código-fonte. Em seguida, a nova versão é compilada e enviada à \textit{OpenCM9.04}. Na sequência, inicializa-se o robô e verifica-se a caminhada.
 
-O segundo problema com o \textit{walking gait} atual é a dificuldade de implementação de simulações, testes e depuração. A única forma de obter visualização da saída gerada é através do \textit{console serial} da IDE de programação, o que torna o processo de depuração um exercício de abstração com visualização de ângulos em 3 dimensões, ou arriscar-se aplicando a saída direto aos motores, de alto custo. Em relação a simulação, ela seria até possível, porém seria necessária mais um dispositivo \textit{OpenCM9.04} e algumas modificações no código original para que ele possa ser acoplado a algum framework de simulação de robôs.
+Além de massante, este esquema de atualização não favorece uma forma sadia de manter as alterações dos parâmetros organizada. Há uma frequente perda de quais valores de parâmetros são melhores para qual tipo de situação. Uma solução seria criar subversões do sistema para cada cenário, o que desfavorece a correção de \textit{BUGs} e melhorias, já que cada modificação deve ser refletida em várias versões. Uma segunda possibilidade seria criar uma interface de comunicação entre um computador, que funcionaria como um gerenciador, e o \textit{walking gait} via USB. Assim, o computador poderia guardar arquivos de configurações que seriam enviados à placa microcontroladora a medida que fossem necessários, o que seria uma saída simples e eficaz, mas não definitiva, tendo em vista os problemas citados abaixo.
 
-O terceiro problema é a forma em que o paradigma estruturado foi utilizada no sistema. A complexidade do sistema implica para uma baixa curva de assimilação do funcionamento em um paradigma orientado a objetos ajudaria consideravelmente na compreensão dos mecanismos dentro do \textit{walking gait}, quais os seus papéis e como eles se comunicam.
+O segundo problema com o \textit{walking gait} atual é a dificuldade de implementação de simulações, testes e depuração. A única forma de obter visualização da saída gerada é através do \textit{console serial} da IDE de programação -- o que torna o processo de depuração um exercício de abstração com visualização de ângulos em 3 dimensões -- ou arriscar-se aplicando a saída de teste direto aos motores de alto custo, confiando que tudo sairá bem. A ativação da simulação neste cenário é possível. Porém, haveria a dependência do dispositivo \textit{OpenCM9.04}, implicando também em algumas dificuldades técnicas na hora de testes de distúrbio em um ambiente simulado, sendo que a placa microcontroladora está ligada aos sensores reais.
 
-O quarto problema é a natureza multi-processada do sistema. "Ao mesmo tempo" em que ângulos devem ser enviados aos motores, a leitura dos sensores devem ser processadas e levadas em consideração para as próximas iterações. No \textit{OpenCM0.04}, esse paralelismo é habilitado através da biblioteca \textit{MapleFreeRTOS}. O fato de já haver muito processamento para rodar o sistema atual limita uma grupo de melhorias a serem desenvolvidas, o que poderia levar a próxima geração de robôs ainda mais estáveis.
+O terceiro problema é a forma em que o paradigma estruturado foi utilizado. Já que o processo realizado pelo \textit{walking gait} já não é trivial, a má organização do código implica em uma baixa curva de assimilação do seu funcionamento. Como solução é proposta a aplicação de um paradigma orientado a objetos, dividindo cada subprocesso em diferentes componentes encapsulados.
 
-Por fim, o quinto problema, que também limita o desenvolvimento da próxima geração, é o tamanho da memória ROM, que guarda o \textit{walking gait}, da placa microcontroladora. Atualmente, o \textit{firmware} da \textit{OpenCM9.04} já foi modificado, via remoção de funções não utilizadas, para diminuir seu tamanho e  assim liberar espaço para a versão do sistema.
+O quarto problema é a natureza multi-processada do sistema. Ao mesmo tempo em que ângulos devem ser enviados aos motores, a leitura dos sensores de orientação devem ser processadas e levadas em consideração para as próximas iterações. No \textit{OpenCM0.04}, esse paralelismo é habilitado através da biblioteca \textit{MapleFreeRTOS}. O fato de já haver muito processamento para rodar o sistema atual limita possíveis futuras melhorias a serem desenvolvidas, melhorias estas que poderia levar à próxima geração de robôs ainda mais estáveis.
 
-Dadas, os problemas encontrados no funcionamento do sistema atual, e as considerações listadas até agora, este trabalho propõe mover a execução do componente \textit{walking gait} do microcontrolador \textit{OpenCM09.04} para o computador. Para o projeto da solução, foi levada em consideração dois aspectos importantes: o desempenho e a interface de comunicação com os motores, decidindo-se assim pela adoção da linguagem \textit{C++} versão 14. Um fator bastante importante foram os recursos da linguagem que vão prover uma arquitetura bem simples e eficiente.
+Por fim, o quinto problema -- que também limita o desenvolvimento da próxima geração da caminhada -- é o tamanho da memória \textit{ROM} da placa microcontroladora ondeo programa compilado do \textit{walking gait} é guardado. Atualmente, o \textit{firmware} da \textit{OpenCM9.04} já foi modificado pela equipe da AUTUofM, via remoção de funções e bibliotecas não utilizadas, para diminuir seu tamanho e  assim liberar espaço para a versão atual do sistema.
 
-\todo{Conversar com o orientador sobre a lista de objetivos.}\todo{Melhorar a descrição dos objetivos.}Desta forma, este trabalho tem como objetivo a implementação de uma versão funcional do \textit{walking gait}, melhorando o código atual - de forma a diminuir a curva de aprendizado, assim estimulando novas extensões e otimizações - com uma nova arquitetura orientada a objetos.
+Dados os problemas encontrados no funcionamento do sistema atual e as considerações listadas até agora, este trabalho propõe mover a execução do componente \textit{walking gait} do microcontrolador \textit{OpenCM09.04} para o controlador principal, um computador Linux rodando Ubuntu 14.04. Para o projeto da solução, foi levada em consideração dois aspectos importantes: o desempenho e a interface de comunicação com os motores, decidindo-se assim pela adoção da linguagem \textit{C++} versão 14.
 
-\todo{Conversar com o orientador sobre isto.}
+Para sumarizar, este trabalho tem como objetivo a implementação de uma versão funcional do \textit{walking gait}, melhorando o código atual, de forma a diminuir a curva de aprendizado e aumentando as possibilidades para a implementação de futuras melhorias.
+
 \section{Organização do trabalho}
 
-\todo{Após conclusão escrever esta parte.}
-Descrever os capítulos e seções.
-
-
+\todo{Escrever a seção Organização do trabalho}
+Organização do trabalho
