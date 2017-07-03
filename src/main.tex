@@ -51,10 +51,12 @@
 \renewcommand{\algorithmicuntil}{\textbf{até que}}
 \renewcommand{\algorithmiccomment}[1]{\% #1}
 
+\newcommand{\writedocumenttitle}{Uma estrutura de controle de caminhada em um robô humanoide em C++
+	}
 \newcommand{\writeauthor}{Jamillo G. da S. Santos}
 \newcommand{\writeteacher}{Prof. Dr. Eduardo Braulio}
 \newcommand{\writeteacheren}{Prof. Doc. Eduardo Braulio}
-\newcommand{\writedate}{Abril 2017}
+\newcommand{\writedate}{2017}
 
 \newcommand*\circled[1]{\tikz[baseline=(char.base)]{\node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
 
@@ -213,7 +215,7 @@
 	\listoffigures
 
 	% Lista de tabelas
-	\listoftables
+	% \listoftables
 	
 	% Lista de abreviaturas e siglas
 	\listadeabreviaturas
@@ -254,14 +256,15 @@
 	\bibliography{capitulos/Referencias}
 	
 	% Ap���ndice A (arquivo Includes/ApendiceA)
-	\include{capitulos/ApendiceA}
+	% \include{capitulos/ApendiceA}
 	
 	% Anexo A (arquivo Includes/AnexoA)
-	\include{capitulos/AnexoA}
+	%\include{capitulos/AnexoA}
 	
 	% P���gina em branco
-	\newpage
+	\newpage{}
+	\newpage{}
 	
-	\listoftodos
+	%\listoftodos
 
 \end{document}
