@@ -8,7 +8,7 @@
 
 Como controlador principal, um computador \textit{mini-box} é utilizado em conjunto com uma placa microcontroladora \textit{OpenCM9.04}, que serve de interface entre o controlador principal e os motores \cite{autdp2016}. Adicionalmente, um sensor \textit{IMU InvenSense MEMS MPU} integrado com 9 eixos \cite{karimionline} está anexado em suas costas para fornecer informações sobre a orientação do torso diretamente à placa microcontroladora.
 
-As partes de ligam os motores de Arash foram esculpidas de blocos sólidos de alumínio e em suas juntas estão presentes motores de alto desempenho projetados para robôs pela empresa sul-coreana Robotis Co.
+As partes que ligam os motores de Arash foram esculpidas de blocos sólidos de alumínio e em suas juntas estão presentes motores de alto desempenho projetados para robôs pela empresa sul-coreana Robotis Co.
 
 Possuindo 20 graus de liberdade (ou \abrv[DOF -- Do inglês \textit{Degrees Of Freedom}, ou graus de liberdade]{DOF}, do inglês \textit{degrees of freedom}), ele tenta imitar a forma humana, tanto em suas juntas quanto em suas proporções. Os DOFs são o número de parâmetros de posições independentes que definem a configuração de uma sistema mecânico \cite{craig1989} e tão importante quanto sua configuração é a sua orientação para que os cálculos funcionem como o esperado. A inversão de qualquer orientação entre o modelo matemático e o modelo real causará uma inversão durante a caminhada, causando reações inesperadas e possíveis danos aos motores.
 
@@ -95,7 +95,7 @@ Em poder desses vetores, utiliza-se os conceitos da cinemática inversa para ger
 
 Durante a implementação deste trabalho, nenhuma modificação foi realizada no componente de orientação originalmente desenvolvido por Karimi \textit{et al}. Entretanto, para a implementação do cálculo da trajetórias é necessário algumas informações sobre a saída deste componente.
 
-No final do processamento, obtém-se como saída um vetor com de aceleração linear nos eixos $x$ e $y$, como mostra a equação~\ref{eq:orientation:accel:definition}. Então, o vetor $Accel$ é utilizado para o cálculo da detecção de ``empurrões'', ou distúrbios, como visto nas equações \ref{eq:orientation:push:x} e \ref{eq:orientation:push:y}, que representação a variação na aceleração linear entre a iteração atual e a anterior.
+No final do processamento, obtém-se como saída um vetor com aceleração linear nos eixos $x$ e $y$, como mostra a equação~\ref{eq:orientation:accel:definition}. Então, o vetor $Accel$ é utilizado para o cálculo da detecção de ``empurrões'', ou distúrbios, como visto nas equações \ref{eq:orientation:push:x} e \ref{eq:orientation:push:y}, que representação a variação na aceleração linear entre a iteração atual e a anterior.
 
 \begin{align}
 	Accel &= [Accel_x \hspace{5mm} Accel_y] \label{eq:orientation:accel:definition}
@@ -147,7 +147,7 @@ Na primeira etapa, a figura~\ref{fig:ik:upperview} mostra uma tomada de cima de 
 	\centering
 	\includegraphics[scale=1.5]{imagens/svg/inverse-kinematics-upperview}
 	\caption{Diagrama da visão superior da estrutura de Arash que representa da equação~\ref{eq:ik:upper:hip:yaw} até~\ref{eq:ik:upper:z:2}}
-	\caption*{\cite{karimionline}}
+	\caption*{Fonte: \cite{karimionline}}
 	\label{fig:ik:upperview}
 \end{figure}
 
@@ -164,7 +164,7 @@ Seguindo o processo de parametrização dos ângulos das juntas, observa-se na f
 	\centering
 	\includegraphics[scale=1.5]{imagens/svg/inverse-kinematics-frontalview}
 	\caption{Diagrama da visão frontal de Arash que representa da equação~\ref{eq:ik:p:hip:roll} até~\ref{eq:ik:z:3}}
-	\caption*{\cite{karimionline}}
+	\caption*{Fonte: \cite{karimionline}}
 	\label{fig:ik:frontalview}
 \end{figure}
 
@@ -182,7 +182,7 @@ Na terceira etapa, a figura~\ref{fig:ik:frontalview} mostra a visão frontal de 
 	\centering
 	\includegraphics[scale=1.5]{imagens/svg/inverse-kinematics-sideview}
 	\caption{Diagrama da visão lateral de Arash que representa da equação~\ref{eq:ik:p:hip:roll} até~\ref{eq:ik:z:3}}
-	\caption*{\cite{karimionline}}
+	\caption*{Fonte: \cite{karimionline}}
 	\label{fig:ik:sideview}
 \end{figure}
 

@@ -2,7 +2,7 @@
 \chapter{Arquitetura}
 \label{ch:architecture}
 
-A robótica tenta solucionar problemas envolvendo diversas áreas da computação. Desde o controle de motores, usando programação de baixo nível, até soluções sofisticas utilizando \abrv[IA -- Inteligência artificial]{IA (Inteligência artificial)} aplicada a visão e tomada de decisões, entre outros. Assim, o desenvolvimento de uma única ferramenta, em uma única linguagem, que solucione todos os problemas pode tornar-se inviável, já que cada linguagen é projetada com intenções e problemas diferente em mente.
+A robótica tenta solucionar problemas envolvendo diversas áreas da computação. Desde o controle de motores, usando programação de baixo nível, até soluções sofisticas utilizando \abrv[IA -- Inteligência artificial]{IA (Inteligência artificial)} aplicada a visão e tomada de decisões, entre outros. Assim, o desenvolvimento de uma única ferramenta, em uma única linguagem, que solucione todos os problemas pode tornar-se impraticável o estágio atual da tecnologia, já que as linguagens são projetadas com intenções e problemas diferentes em mente.
 
 Para solucionar este problema, a arquitetura adotada pelo time AUT-UofM é distribuída, baseada no \textit{framework} ROS. Onde cada componente tem uma função diferente dentro do sistema total. O ROS é uma coleção de bibliotecas e convenções para simplificar a tarefa de criar comportamentos complexos na grande variedade de robôs e suas plataformas \cite{ros2017}.
 
@@ -21,7 +21,7 @@ A placa controladora conta com um processador \textit{32bit ARM Cortex-M3}, mem�
 
 Os motores, todos pertencentes a categoria \textit{Dynamixel}, são atuadores inteligentes otimizados para robôs. Eles possuem controle \abrv[PID -- do inglês \textit{Porportional Integral Derivative}]{PID} integrado e comunicar-se em uma rede de comunicação \abrv[TTL -- Do inglês \textit{transistor-transistor logic}]{TTL (\textit{transistor-transistor logic})}{} com \textit{baudrate} de até $4.5$ Mbps \cite{dynamixel}.
 
-A camada de software é executada dentro de um computador, doravante referido como controlador principal, \textit{mini-box PC MAXData QutePC-3001} com um processador 64 bits de dois núcleos Intel\copyright{} Celeron\copyright{} 847E (1,1GHz e 2MB de \textit{cache}), rodando o sistema operacional Linux Ubuntu versão 14.04. Esta camada é responsável por rodar os componentes de software de alto nível e enviar comandos de controle para a camada inferior de baixo nível.
+A camada de software é executada dentro de um computador, doravante referido como controlador principal, \textit{mini-box PC MAXData QutePC-3001} com um processador 64 bits de dois núcleos Intel\copyright{} Celeron\copyright{} 847E (1,1GHz e 2MB de \textit{cache}), rodando o sistema operacional Linux Ubuntu versão 14.04. Esta camada é responsável por rodar os componentes de software, de alto nível, e enviar comandos de controle para a camada inferior, de baixo nível -- figura~\ref{fig:softwarearchitecture:overview}.
 
 \begin{figure}[htb]
 	\centering
@@ -45,7 +45,7 @@ Visão não é o foco deste trabalho. Entretanto, uma explanação geral é nece
 
 O controle de visão é um software que conecta-se via USB com a câmera, analisando as imagens e extraindo informações relevantes à execução da tarefa do robô. De forma geral, podemos abstrair seu funcionamento em duas \textit{threads} distintas:
 
-A primeira é o \textit{loop} principal, representada no diagrama de sequência na figura \ref{fig:softwarearchitecture:vision}. Em um primeiro passo, o controlador obtém a imagem da câmera. Em seguida, a extração de informações é realizada. Essas informações dependem da tarefa que o robô deve realizar. Por exmeplo, detectar a bola, os adversários e as linhas do campo, em caso de da tarefa ser uma partida de futebol; ou detectar as linhas guia da pista de corrida no caso da tarefa ser uma corrida. Em seguida, tudo o que foi encontrado é salvo para futuras consultas até que a próxima iteração ocorra e os dados sejam atualizados.
+A primeira é o \textit{loop} principal, representada no diagrama de sequência na figura \ref{fig:softwarearchitecture:vision}. Em um primeiro passo, o controlador obtém a imagem da câmera. Em seguida, a extração de informações é realizada. Essas informações dependem da tarefa que o robô deve realizar. Por exemplo, detectar a bola, os adversários e as linhas do campo, em caso de da tarefa ser uma partida de futebol; ou detectar as linhas guia da pista de corrida no caso da tarefa ser uma corrida. Em seguida, tudo o que foi encontrado é salvo para futuras consultas até que a próxima iteração ocorra e os dados sejam atualizados.
 
 A segunda \textit{thread}, cuja a interação pode ser visualizada na figura~\ref{fig:softwarearchitecture:software}, do controle de visão executa o sistema de comunicação que pode ser implementado de várias maneiras, desde objetos \textit{JSON} sendo transmitidos via \textit{UDP} até um \textit{message broker} com filas de consumo. Ao receber a mensagem de solicitação das informações, responde serializando os dados que ficaram salvos na primeira \textit{thread}, fornecendo as informações com atraso mínimo.
 
@@ -79,9 +79,11 @@ O componente leitor de orientação desempenha um papel importante ao lado do \t
 	\label{fig:softwarearchitecture:lowlevel}
 \end{figure}
 
-Ainda no leitor de orientação, os dados são coletados da \textit{IMU} e um processo de utilizando filtro de \todo{Explicar este processo melhor}\textit{Kalman} é utilizado para obter ua estimativa mais acurada das orientações que são salvas em variáveis. Já na \textit{thread} que roda o \textit{walking gait}, a orientação é continuamente consultada e utilizada para que os ângulos das juntas sejam atualizados. O filtro de Kalman é um algoritmo que dada uma séria de observações no tempo, e suas incertezas, é capaz de estatisticamente calcular um valor que tende a ser mais próximo ao real \cite{grewal2014}.
+Ainda no leitor de orientação, os dados são coletados da \textit{IMU} e um processo de utilizando filtro de \textit{Kalman} é utilizado para obter uma estimativa mais acurada das orientações que são salvas em variáveis. Já na \textit{thread} que roda o \textit{walking gait}, a orientação é continuamente consultada e utilizada para que os ângulos das juntas sejam atualizados. O filtro de Kalman é um algoritmo que -- dada uma séria de observações no tempo e suas incertezas -- é capaz de, estatisticamente, calcular um valor que tende a ser mais próximo ao real \cite{grewal2014}.
 
 Dentro da placa microcontroladora \textit{OpenCM9.04}, o \textit{walking gait} e o leitor de orientação rodam em \textit{threads} dinstintas, recurso este habilitado pela biblioteca \textit{MapleFreeRTOS}. Na figura~\ref{fig:softwarearchitecture:lowlevel} observa-se a execução de ambas a \textit{threads} separadamente e a forma de interação entre elas. Iniciando a partir do \textit{walking gait}, onde os dados de orientação são lidos diretamente do leitor de orientação, em seguida calcula-se os ângulos das juntas que são enviadas aos motores. Em paralelo, o leitor de orientação continua recebendo os dados da \textit{IMU}, processando e salvando-os para que fiquem disponíveis ao \textit{walking gait}. Nota-se que, em ambas as \textit{threads}, as sequências de ações são executadas dentro de \textit{loops} principais.
+
+Para sumarizar, foram apresentados os componentes, da arquitetura atual, e o seu papel dentro do sistema completo. Seus fluxos de dados e uma base de como seu processamento ocorre também foi mostrado.
 
 \section{A nova arquitetura}
 
@@ -98,7 +100,7 @@ Uma das principais mudanças realizadas neste trabalho é a re-implementação d
 
 A figura~\ref{fig:softwarearchitecture:newproposal} mostra a visão simplificada da nova arquitetura. Nela observa-se o \textit{walking gait} -- agora na camada de \textit{software} -- funcionando dentro do controlador principal, e um novo componente chamado \textit{proxy} é apresentado como interface os componentes de \textit{hardware} e o \textit{walking gait}. O papel do novo componente é de servir realmente como um \textit{proxy} enviando comandos recebidos do controlador principal aos motores e também receber a orientação do componente leitor de orientação e fornecê-la ao controlador principal.
 
-O controlador de comportamento continua a enviar os comandos de controle ao \textit{walking gait}. Porém, ao invés de usar comandos binários via USB, agora utiliza objetos serializados via \abrv[JSON -- \textit{Java Script Object Notation}]{JSON}{}via UDP (seção~\ref{subsec:architecture:walkinggait:controlserver}).
+O controlador de comportamento continua a enviar os comandos de controle ao \textit{walking gait}. Porém, ao invés de usar comandos binários via USB, agora utiliza objetos serializados via \abrv[JSON -- \textit{Java Script Object Notation}]{JSON}{}por UDP (seção~\ref{subsec:architecture:walkinggait:controlserver}).
 
 Entre o \textit{walking gait} e o \textit{Proxy} a comunicação ocorre via USB @ 1 Mbps. Comandos de controle utilizando o \textit{dynamixel protocol 2.0} são gerados e enviados diretamente do \textit{walking gait} ao \textit{Proxy}, que apenas os encaminha aos motores. Esta estratégia foi adotada para habilitar a possibilidade da utilização de motores de diferentes tipos, não apenas da Robotis Co. Assim, apenas o \textit{walking gait} é responsável pela geração de destes comandos específicos de cada motor enquanto o \textit{Proxy} apenas os encaminha.
 
@@ -115,11 +117,9 @@ Na figura~\ref{fig:softwarearchitecture:newproposal:sequence}, é possível obse
 
 \section{\textit{Walking gait}}
 
-A nova implementação do \textit{walking gait}, uma mudança completa paradigma estruturado ao orientado a objetos foi realizada. Afim de facilitar o desenvolvimento, o projeto foi divido em \todo{Conferir a quantidade de submódulo}$3$ submódulos: o servidor de controle, o motor de caminhada e o atualizador de juntas.
+A nova implementação do \textit{walking gait}, uma mudança completa paradigma estruturado ao orientado a objetos foi realizada. Afim de facilitar o desenvolvimento, o projeto foi divido em $3$ submódulos: o servidor de controle, o motor de caminhada e o atualizador de juntas.
 
 Nesta seção, os três submódulos são apresentados e,  por fim, um software de apoio chamado visualizador 3D é apresentado.
-
-\todo{Verificar a localidade deste parágrafo. Ele foi escrito mas parece estar fora do lugar além de duplicar informações.}Para realizar a tarefa de forma adequada, o componente faz uso de \textit{threads} afim de não bloquear os processos, o que adicionaria atrasos indesejados entre as iterações. Desta forma, cada submódulo roda em sua própria \textit{thread}, compartilhando recursos do processo principal.
 
 Adicionalmente, todos os parâmetros de configuração -- tais como as portas do de controle do visualizador 3D e servidor de controle (descritos nas próximas seções), deslocamentos físicos das juntas (\textit{offsets}), peso de compensação do processo de  \textit{swing} do corpo ($B_{swing}$), a frequência de geração dos moimentos ($Gait_{frequency}$), o \textit{walking gait} possui um esquema de configurações baseado em objetos JSON salvos em arquivos. Desta forma, é possível inicializar o componente com diversas parâmetros diferentes. Assim, também é possível o versionamento dos arquivos de configuração, para que alterações sejam mantidas de forma rastreável.
 
@@ -154,7 +154,7 @@ Em caso de intenção de parada, o mesmo comando \textit{omniwalk} deverá ser e
 
 \subsection{Motor de caminhada}
 
-\todo{Encher este parágrafo}O motor de caminhada é onde encontram-se todas as implementações do cálculo das juntas.
+O motor de caminhada é o submódulo onde os processos dos cálculo das trajetórias, e da IK serão executados e guardados para, posteriormente, serem aplicados aos motores pelo submódulo atualizador de juntas (subseção \ref{subsec:architecture:walkinggait:jointsupdater}).
 
 A classe $Humanoid$ é usada para a manter o estado das juntas, tanto posição quanto angulações. Ela também é usada para manter os estados das juntas durante os cálculos da \textit{IK}.
 
@@ -181,7 +181,7 @@ O processo de caminhada inicia-se no momento em que qualquer velocidade é difer
 \subsection{Atualizador de juntas}
 \label{subsec:architecture:walkinggait:jointsupdater}
 
-\todo{Citar a thread.}Este módulo é responsável pela atualização dos ângulos dos motores. Ele roda em sua própria \textit{thread}, afim de não bloquear o processamento dos demais componentes do \textit{walking gait}.
+Este módulo é responsável pela atualização dos ângulos dos motores. Ele roda em sua própria \textit{thread}, afim de não bloquear o processamento dos demais componentes do \textit{walking gait}.
 
 A implementação base do atualizador de juntas, usa uma abstração de motores afim de prover a possibilidade do uso de motores de fabricantes diferentes em futuras aplicações.
 
@@ -252,7 +252,7 @@ As trajetórias geradas, juntamente com os 20 ângulos radianos das juntas, gera
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[scale=0.4]{imagens/visualizador3d}
+	\includegraphics[scale=0.55]{imagens/visualizador3d}
 	\caption{Captura de tela da imagem gerada pelo visualizador 3D.}
 	\label{fig:architecture:visualization:printscreen}
 \end{figure}

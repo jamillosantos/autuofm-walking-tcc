@@ -14,6 +14,7 @@
 \usepackage{dsfont}
 \usepackage{amssymb,amsmath}
 \usepackage{multirow}
+%\usepackage[hidelinks]{hyperref}
 \usepackage[alf]{abntcite}
 \usepackage[pdftex]{color, graphicx}
 \usepackage{colortbl} 
@@ -59,8 +60,6 @@
 
 \graphicspath{{imagens/}}
 
-
-
 \colorlet{punct}{red!60!black}
 \definecolor{background}{HTML}{EEEEEE}
 \definecolor{delim}{RGB}{20,105,176}
@@ -95,21 +94,6 @@
 	{]}{{{\color{delim}{]}}}}{1},
 }
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% REMOVER ESTA LINHA PARA RESTAURAR AS MARGENS DOS TODOS %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\usepackage[paperwidth=210mm,
-%paperheight=297mm,
-%left=50pt,
-%top=50pt,
-%textwidth=345pt,
-%marginparsep=15pt,
-%marginparwidth=175pt,
-%textheight=692pt,
-%footskip=50pt]
-%{geometry}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newcommand{\answer}[2][]
 {\todo[color=cyan, #1]{R: #2}}
@@ -260,7 +244,7 @@
 	\include{capitulos/Capitulo4}
 	
 	% Capitulo 5: Quinto cap���tulo (arquivo Includes/Capitulo5.tex)
-	\include{capitulos/Capitulo5}
+	% \include{capitulos/Capitulo5}
 		
 	% Consideracoes finais
 	\include{capitulos/Consideracoes} 
